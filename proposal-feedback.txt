@@ -1,0 +1,34 @@
+
+
+Evaluation and Feedback
+CMSI 4072 project ~ Spring 2024
+Henry Benso, Jose Fuentes, and Edward Halim
+Wondobot Discord bot project
+==============================
+
+Proposal Document:
+------------------
+   Nice work on the document.  The description is at high enough level to
+   give the reader an overview, and yet low enough level to let the reader
+   know what some of the planned technologies are that you are using, and
+   what they will be used for.
+
+   While I understand the focus on the "home team", I'm wondering if you'll
+   plan to incorporate other teams' iinformation as well, or only focus on
+   the Earthquakes?
+
+   Let me know when you get your Discord server set up so I can join it!
+
+Proposal Presentation:
+----------------------
+   Good job on the presentation!  The slides look great, your justification
+   of both the project goals and the applicability to the course are well-
+   thought-out and clear.  I like your use of graphics as well, especially
+   the cheering section!  Just an idea, see if you can edit that picture to
+   have the banners read something about your project!  :grin:
+
+
+=============================================================================
+your score:  5% out of 5% which is an A-plus
+
+Great job on this presentation and proposal and great start to the semester!
