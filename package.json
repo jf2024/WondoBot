@@ -1,0 +1,22 @@
+{
+  "name": "wondobot",
+  "version": "1.0.0",
+  "description": "Discord bot for a community of fans of the San Jose Earthquakes",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jf2024/WondoBot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jf2024/WondoBot/issues"
+  },
+  "homepage": "https://github.com/jf2024/WondoBot#readme",
+  "dependencies": {
+    "discord.js": "^14.14.1"
+  }
+}
