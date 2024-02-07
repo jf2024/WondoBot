@@ -1,0 +1,41 @@
+
+
+Evaluation for homework #1
+CMSI 4072 ~~ Spring 2024
+====================================
+
+1.1 basic tasks; there are 8 in the book
+      of which 5 are most important             8 of 8 points
+1.2 descriptions                                8 of 8 points
+2.4 google docs [gimme, accept anything]        1 of 1 point
+2.5 JBGE                                        1 of 1 point
+4.2 critical path [3], total time [2]           3 of 5 points
+4.4 Gantt chart [4], finish date [1]            4 of 5 points
+4.6 deus ex machina                             1 of 1 point
+4.8 biggest mistakes                            2 of 2 points
+5.1 five characteristics of good req'ts         1 of 1 point
+5.3 TimeShifter req'ts categorizations          5 of 5 points
+5.9 MoSCoW for Mr. Bones                        3 of 3 points
+
+
+Total possible score: 40 points
+
+EVALUATION
+============================================================================
+Your score: 37 out of 40 = 92.5% which is an A-minus
+
+Comments:
+---------
+
+problem 4.2 the critical path should be G -> D -> E -> M -> Q making 32 days.
+
+problem 4.4 you are starting your schedule on Monday when the problem states
+   that January 1 is a WEDNESDAY.  You also are not allowing for specified
+   holidays so your developers will not be happy.
+
+problem 5.9 your "won't" goals might add some fun to the game, but I can see
+   how they would be more difficult and so would be stretch goals or be left
+   out completely...
+
+Good job on this one!!  Keep up the good work........
+
