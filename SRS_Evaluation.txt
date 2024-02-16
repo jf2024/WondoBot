@@ -1,0 +1,48 @@
+
+
+Evaluation and Feedback
+CMSI 4072 project ~ Spring 2024
+Henry Benso, Jose Fuentes, and Edward Halim
+Wondobot Discord bot project
+==============================
+
+Software Requirements Specification Document:
+---------------------------------------------
+-- Introduction Section
+   Nice work on this section!  Nothing to add here.  The diagram is great!
+
+-- Functional Requirements
+   Be careful of "weasel words" like "user friendly" and "intuitive" in your
+   documents.  What is intuitive to you may not be to me.  Your requirements
+   should be worded with "shall", with each requirement being numbered.  Use
+   of a bulleted list is discouraged unless it's part of a "will" or "should"
+   statement.  For example:
+
+   2.1 Score Prediction Submission
+      Users will be able to submit their score predictions for upcoming San
+      Jose Earthquakes football games through Discord.  The submission process
+      will be done so that users can easily determine the operations without
+      needing to refer to a help screen or user guide document.
+   2.1.1 Predictions Timeframe
+      2.1.1.1  Users shall have a limited amount of time to enter predictions.
+      2.1.1.2  Entry time shall begin 20 minutes prior to the start of a game.
+      2.1.1.3  Entry time shall end 5 minutes prior to kickoff.
+      2.1.1.3  Users shall not be allowed to submit predictions once the game
+               has started.
+
+-- Performance Requirements
+   This section is good, but the same comment applies about "shall" language.
+
+-- Environment Requirements
+   This section is good, but the same comment applies about "shall" language.
+
+
+=============================================================================
+your score:  8% out of 10% which is a B
+
+All in all, not a bad first effort, you just need to fill in more specifics.
+Your 'requirements' do not use requirements language ~ for a waterfall style
+document you need to have "shall" statements for the requirements.
+
+Make the changes as suggested above, including many more requirements for
+the second submission and you'll get the full 10% on this document.
