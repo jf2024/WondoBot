@@ -1,0 +1,57 @@
+
+
+Evaluation and Feedback
+CMSI 4072 project ~ Spring 2024
+Henry Benso, Jose Fuentes, and Edward Halim
+Wondobot Discord bot project
+=============================================
+
+Software Development Plan Document:
+---------------------------------------------
+-- General Comments
+   Nice work on this document!  The group is doing well.
+
+   You should use PRESENT TENSE in your documents.  Don't say what your
+   application WILL do, say what it DOES do.  This is a VERY common mistake
+   that even experienced authors make!  For example:
+
+   you have:
+      The bot will allow users to submit their predictions, earn points
+      based on the accuracy of their forecasts, and engage with other users.
+
+   consider instead:
+      The bot allows users to submit their predictions, to earn points based
+      on the accuracy of those predictions, and to engage with other users.
+
+   This is sprinkled all through your documentation so try to make these
+   corrections.
+
+-- Introduction Section
+   Good job on this section, nothing to change, no additional comments.
+
+-- Project Resources Section
+   Good job on this section also, nothing to change, no additional comments.
+
+-- Project Organization Section
+   Same comment here, nothing to change, no additional comments.
+
+-- Project Schedule Section
+   The schedule is difficult to read because of the black background.  It's
+   better to have black on white rather than white on black so that the
+   duration bars can be seen.  Further, you might consider putting this on
+   a separate section so you can turn that page to landscape mode for more
+   clarity.
+
+   The task/resource table is good, although some of the information is a
+   bit redundant to other sections.  You can try to make that less so in the
+   next iteration.  Be sure to check your spelling and grammar though.  You
+   have "Who Working on it" which could be better as "responsible person" or
+   even just "team member".
+
+=============================================================================
+your score:  9.5% out of 10% = 95% which is an A
+
+Another good job here!
+
+Make the changes as suggested above, including many more requirements for
+the second submission and you'll get the full 10% on this document.
