@@ -1,6 +1,7 @@
 const axios = require("axios");
+const { apiKey } = require("../config.json");
 
-const API_KEY = "1987e638c7msh0e82524975f3e4ep14efe3jsne60b31193aab";
+
 const teamID = "1596"; 
 const host = "api-football-v1.p.rapidapi.com";
 
@@ -13,11 +14,12 @@ async function getFixtures() {
                 team: teamID,
                 from: "2024-02-23",
                 to: "2024-10-20",
-				//timezone should be in pacific time 
+                //timezone should be in pacific time
                 timezone: "America/Los_Angeles",
             },
             headers: {
-                "X-RapidAPI-Key": API_KEY,
+                "X-RapidAPI-Key":
+                    apiKey,
                 "X-RapidAPI-Host": host,
             },
         };
