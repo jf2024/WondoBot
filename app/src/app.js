@@ -11,18 +11,20 @@ const user = require("./commands/utility/user.js");
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
 });
+// const users = new Collection();
 
-// const member = new Collection();
+// async function updateScore(id, username) {
+//   // const user = users.get(id);
+//   // if (user) {
+//   // }
+//   // const newUser = await Users.create({ user_id: id, username: username });
+//   // users.set(id, newUser);
+//   // return newUser;
+// }
 
-// async function createUser(paramUser) {
-//   const user = member.get(paramUser.id);
-
-//   if (!user) {
-//     const newUser = await User.create({ user_id: id, score: 0 });
-//     return newUser;
-//   }
-
-//   return user;
+// function getScore(id) {
+//   const user = users.get(id);
+//   return user ? user.balance : 0;
 // }
 
 client.commands = new Collection();
