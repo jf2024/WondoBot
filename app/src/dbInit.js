@@ -4,7 +4,6 @@ const sequelize = new Sequelize("wondo_database", "user", "password", {
   host: "localhost",
   dialect: "postgres",
   logging: false,
-  // storage: "database.sqlite",
 });
 
 const testDbConnection = async () => {
@@ -16,23 +15,24 @@ const testDbConnection = async () => {
   }
 };
 
-const User = require("./models/Users.js")(sequelize, Sequelize.DataTypes);
+const Users = require("./models/Users.js")(sequelize, Sequelize.DataTypes);
 
 const force = process.argv.includes("--force") || process.argv.includes("-f");
 
 sequelize
   .sync({ force })
   .then(async () => {
-    const newUser = [
-      User.upsert({
-        user_id: "123456789",
-        username: "test",
-        score: 0,
-      }),
-    ];
+    const jane = await Users.create({
+      user_id: "123456789",
+      username: "jane",
+      score: 0,
+    });
 
-    await Promise.all(newUser);
-    console.log("Database synced");
+    // console.log("Database synced");
+    // console.log(jane instanceof User);
+    console.log(jane.user_id, jane.username, jane.score);
     sequelize.close();
   })
   .catch(console.error);
+
+module.exports = { Users };

@@ -4,6 +4,8 @@
   "description": "Discord bot for a community of fans of the San Jose Earthquakes",
   "main": "app.js",
   "scripts": {
+    "start": "node --env-file=.env ./app/src/app.js",
+    "db_init": "node ./app/src/dbInit.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,7 +20,6 @@
   "homepage": "https://github.com/jf2024/WondoBot#readme",
   "dependencies": {
     "discord.js": "^14.14.1",
-    "dotenv": "^16.4.5",
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.1"

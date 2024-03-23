@@ -1,17 +1,18 @@
+const TOKEN = process.env.DISCORD_TOKEN;
+
 const fs = require("node:fs");
 const path = require("node:path");
 const { Op } = require("sequelize");
 // Require the necessary discord.js classes
 const { Client, Collection, Events, GatewayIntentBits } = require("discord.js");
-const { token } = require("../../config.json");
-const { User } = require("./models/Users.js");
-const user = require("./commands/utility/user.js");
+// Require the necessary discord.js classes
+const db = require("./dbInit.js");
 
 // Create a new client instance
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
 });
-// const users = new Collection();
+// const members = new Collection();
 
 // async function updateScore(id, username) {
 //   // const user = users.get(id);
@@ -66,17 +67,16 @@ for (const file of eventFiles) {
 }
 
 client.once(Events.ClientReady, async (readyClient) => {
-  const mike = User.create({
+  const mike = db.Users.create({
     user_id: "1",
     username: "Mike",
     ranking: 1,
     score: 100,
   });
-  const users = await User.findAll();
-  users.forEach((u) => member.set(u.user_id, u));
+  const a = await db.Users.findAll();
+  console.log(a);
+  // users.forEach((u) => member.set(u.user_id, u));
 });
 
 // Log in to Discord with your client's token
-client.login(token);
-
-// module.exports = { createUser };
+client.login(TOKEN);

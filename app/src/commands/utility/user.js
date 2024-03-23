@@ -1,16 +1,15 @@
 const { SlashCommandBuilder, Collection } = require("discord.js");
-// const { createUser } = require("../../app.js");
-// const { Users } = require("../../dbObjects.js");
+const db = require("../../dbInit.js");
+
 const member = new Collection();
 
 async function createUser(paramUser) {
   const user = member.get(paramUser.id);
 
   if (!user) {
-    const newUser = await Users.create({
+    const newUser = await db.Users.create({
       user_id: paramUser.id,
       username: paramUser.username,
-      score: 0,
     });
     return newUser;
   }
