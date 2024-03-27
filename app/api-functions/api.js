@@ -11,6 +11,8 @@ Something to note about the fixtures below:
 - need to investigate why some are not in the right time? Maybe its too far out in the future?
 */
 
+
+// grabs all the fixtures/schedule for the SJ team
 async function getFixtures() {
     	const options = {
             method: "GET",
@@ -66,7 +68,7 @@ async function getFixtures() {
       	}
     }
 
-
+// grabs first goal scorer in every game if applicable
 async function getFirstScorer() {
     try {
         const fixturesResponse = await axios.request({
@@ -126,8 +128,79 @@ async function getFirstScorer() {
     }
 }
 
-getFirstScorer();
-getFixtures();
+// will grab current match 
+// need to adjust so it separates date and time like the fixtures function, maybe make a helper function
+async function getCurrentMatch() {
+    try {
+
+        // get the current date, use new Date() to go back to normal
+		// currently, messing around with the date
+        const currentDate = new Date("2024-02-05");
+
+        const fixturesResponse = await axios.request({
+            method: "GET",
+            url: "https://api-football-v1.p.rapidapi.com/v3/fixtures",
+            params: {
+                season: "2024",
+                team: teamID,
+                from: "2024-02-23",
+                to: "2024-11-20",
+                timezone: "America/Los_Angeles",
+            },
+            headers: {
+                "X-RapidAPI-Key": apiKey,
+                "X-RapidAPI-Host": host,
+            },
+        });
+
+        // Find the next fixture after the current date
+        let nextFixture = null;
+        for (const fixture of fixturesResponse.data.response) {
+            const fixtureDate = new Date(fixture.fixture.date);
+            if (fixtureDate > currentDate) {
+                nextFixture = fixture;
+                break;
+            }
+        }
+
+        // Display match information for the next fixture
+        if (nextFixture) {
+            return {
+                date: nextFixture.fixture.date,
+                referee: nextFixture.fixture.referee,
+                venueName: nextFixture.fixture.venue.name,
+                venueCity: nextFixture.fixture.venue.city,
+                fixtureId: nextFixture.fixture.id,
+                leagueName: nextFixture.league.name,
+                homeTeam: nextFixture.teams.home.name,
+                awayTeam: nextFixture.teams.away.name,
+                homeTeamGoals: nextFixture.goals.home,
+                awayTeamGoals: nextFixture.goals.away,
+            };
+            // console.log("Next Fixture:");
+            // console.log(`Date: ${nextFixture.fixture.date}`);
+            // console.log(`Referee: ${nextFixture.fixture.referee}`);
+            // console.log(`Venue: ${nextFixture.fixture.venue.name}`);
+            // console.log(`City: ${nextFixture.fixture.venue.city}`);
+            // console.log(`Fixture ID: ${nextFixture.fixture.id}`);
+            // console.log(`League: ${nextFixture.league.name}`);
+            // console.log(`Home Team: ${nextFixture.teams.home.name}`);
+            // console.log(`Away Team: ${nextFixture.teams.away.name}`);
+            // console.log(`Home Team Goals: ${nextFixture.goals.home}`);
+            // console.log(`Away Team Goals: ${nextFixture.goals.away}`);
+        } else {
+            console.log("No upcoming fixtures.");
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+getCurrentMatch();
+//getFirstScorer();
+//getFixtures();
+
+module.exports = { getCurrentMatch };
 
 
 
