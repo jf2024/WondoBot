@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, Collection } = require("discord.js");
-const db = require("../../dbInit.js");
+const db = require("../../dbObjects.js");
 
 const member = new Collection();
 

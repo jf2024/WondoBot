@@ -5,7 +5,7 @@ const { Op } = require("sequelize");
 const { Client, Collection, Events, GatewayIntentBits } = require("discord.js");
 const { token } = require("../../config.json");
 // Require the necessary discord.js classes
-const db = require("./dbInit.js");
+const db = require("./dbObjects.js");
 
 // Create a new client instance
 const client = new Client({

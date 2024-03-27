@@ -16,6 +16,8 @@ const testDbConnection = async () => {
 };
 
 const Users = require("./models/Users.js")(sequelize, Sequelize.DataTypes);
+require("./models/Predictions.js")(sequelize, Sequelize.DataTypes);
+require("./models/Matches.js")(sequelize, Sequelize.DataTypes);
 
 const force = process.argv.includes("--force") || process.argv.includes("-f");
 
@@ -28,11 +30,9 @@ sequelize
     //   score: 0,
     // });
 
-    // console.log("Database synced");
-    // console.log(jane instanceof User);
+    console.log("Database synced");
+    // console.log(jane instanceof Users);
     // console.log(jane.user_id, jane.username, jane.score);
     sequelize.close();
   })
   .catch(console.error);
-
-module.exports = { Users };

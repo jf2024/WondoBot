@@ -11,11 +11,36 @@ module.exports = (sequelize, DataTypes) => {
         unique: true,
         allowNull: false,
       },
-      ranking: {
+      total_points: {
         type: DataTypes.INTEGER,
-        allowNull: true,
+        allowNull: false,
       },
-      score: {
+      highest_pos: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull: false,
+      },
+      lowest_pos: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull: false,
+      },
+      ppg: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull: false,
+      },
+      result: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull: false,
+      },
+      scorer: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull: false,
+      },
+      outcome: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
         allowNull: false,
