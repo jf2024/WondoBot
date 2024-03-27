@@ -42,10 +42,13 @@ module.exports = {
     const prediction = await db.Prediction.findOne({
       where: { user_id: interaction.user.id, match_id: 0 },
     });
+    // const prediction = await user.getPredictions({
+    //   user_id: interaction.user.id,
+    // });
 
     // add conditional to check if game start time has passed
     // update method
-    if (prediction) {
+    if (prediction !== null) {
       return interaction.reply(
         `You have already made a prediction for this match.`
       );

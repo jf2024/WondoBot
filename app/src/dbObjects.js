@@ -40,13 +40,23 @@ Reflect.defineProperty(User.prototype, "createPrediction", {
 });
 
 Reflect.defineProperty(User.prototype, "getPredictions", {
-  value: () => {
+  value: (params) => {
     return Prediction.findAll({
-      where: { user_id: this.user_id },
+      where: { user_id: params.user_id, match_id: 0 },
       include: [""],
     });
   },
 });
+
+// Reflect.defineProperty(User.prototype, "getTopTenPredictors", {
+//   value: () => {
+//     return User.findAll({
+//       order: [["total_points", "DESC"]],
+//       attributes: ["username"],
+//       limit: 10,
+//     });
+//   },
+// });
 
 // Reflect.defineProperty(Users.prototype, "getUser", {
 //   value: () => {

@@ -1,6 +1,8 @@
 const axios = require("axios");
 const { apiKey } = require("../../../config.json");
 
+const db = require("../dbObjects.js");
+
 const teamID = "1596";
 const host = "api-football-v1.p.rapidapi.com";
 
