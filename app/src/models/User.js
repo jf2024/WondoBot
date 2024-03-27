@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
   return sequelize.define(
-    "Users",
+    "User",
     {
       user_id: {
         type: DataTypes.STRING,
@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       total_points: {
         type: DataTypes.INTEGER,
+        defaultValue: 0,
         allowNull: false,
       },
       highest_pos: {

@@ -6,9 +6,9 @@ const sequelize = new Sequelize("wondo_database", "user", "password", {
   logging: false,
 });
 
-const Users = require("./models/Users.js")(sequelize, Sequelize.DataTypes);
-const Matches = require("./models/Matches.js")(sequelize, Sequelize.DataTypes);
-const Predictions = require("./models/Predictions.js")(
+const User = require("./models/User.js")(sequelize, Sequelize.DataTypes);
+const Match = require("./models/Match.js")(sequelize, Sequelize.DataTypes);
+const Prediction = require("./models/Prediction.js")(
   sequelize,
   Sequelize.DataTypes
 );
@@ -19,43 +19,73 @@ const Predictions = require("./models/Predictions.js")(
 
 // create prediction tabel when user makes prediction ; their user_id as a foreign key
 
-Predictions.belongsTo(Users, { foreignKey: "prediction_id", as: "prediction" });
+User.hasMany(Prediction, { foreignKey: "user_id" });
+Prediction.belongsTo(User, { foreignKey: "user_id" });
 
-Matches.belongsTo(Predictions, { foreignKey: "id", as: "match" });
-
+Match.belongsTo(Prediction, { foreignKey: "id" });
+Prediction.hasOne(Match, { foreignKey: "id" });
 // all predictions for one match point to one match identity in match table
 
-Reflect.defineProperty(Users.prototype, "addPrediction", {
-  value: async (prediction) => {
-    // scoreOne, scoreTwo, firstScorer
-    const predictionItem = await Predictions.findOne({
-      where: { user_id: this.user_id, match_id: prediction.id },
-    });
-
-    // add conditional to check if game start time has passed
-    if (predictionItem) {
-      return predictionItem ?? "no prediction in existence aka null";
-    }
-
-    return Predictions.create({
-      user_id: this.user_id,
-      match_id: prediction.id,
-      user_home_pred: prediction.user_home_pred,
-      user_away_pred: prediction.user_away_pred,
-      user_scorer: prediction.user_scorer,
-      point_awarded: 0,
+Reflect.defineProperty(User.prototype, "createPrediction", {
+  value: async (params) => {
+    return Prediction.create({
+      user_id: params.user_id,
+      match_id: 0, //TODO: add match id
+      user_home_pred: params.scoreOne,
+      user_away_pred: params.scoreTwo,
+      user_scorer: params.firstScorer,
+      points_awarded: 0, //TODO: add point awarded
     });
   },
 });
 
-Reflect.defineProperty(Users.prototype, "getPredictions", {
+Reflect.defineProperty(User.prototype, "getPredictions", {
   value: () => {
-    return Predictions.findAll({
+    return Prediction.findAll({
       where: { user_id: this.user_id },
       include: [""],
     });
   },
 });
+
+// Reflect.defineProperty(Users.prototype, "getUser", {
+//   value: () => {
+//     const user = Users.findOne({
+//       where: { user_id: this.user_id },
+//     });
+//     if (!user) {
+//       return Users.createUser({
+//         user_id: this.user_id,
+//         username: this.username,
+//         total_points: 0,
+//         highest_pos: 0,
+//         lowest_pos: 0,
+//         ppg: 0,
+//         result: 0,
+//         scorer: 0,
+//         outcome: 0,
+//       });
+//     }
+
+//     return user;
+//   },
+// });
+
+// Reflect.defineProperty(Users.prototype, "createUser", {
+//   value: async () => {
+//     return Users.create({
+//       user_id: this.user_id,
+//       username: this.username,
+//       total_points: 0,
+//       highest_pos: 0,
+//       lowest_pos: 0,
+//       ppg: 0,
+//       result: 0,
+//       scorer: 0,
+//       outcome: 0,
+//     });
+//   },
+// });
 
 // Reflect.defineProperty(Matches.prototype, "addMatch", {
 //   value: async (match) => {
@@ -82,4 +112,4 @@ Reflect.defineProperty(Users.prototype, "getPredictions", {
 //   },
 // });
 
-module.exports = { Users, Matches, Predictions };
+module.exports = { User, Match, Prediction };

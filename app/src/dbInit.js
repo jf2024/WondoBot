@@ -15,9 +15,9 @@ const testDbConnection = async () => {
   }
 };
 
-const Users = require("./models/Users.js")(sequelize, Sequelize.DataTypes);
-require("./models/Predictions.js")(sequelize, Sequelize.DataTypes);
-require("./models/Matches.js")(sequelize, Sequelize.DataTypes);
+const User = require("./models/User.js")(sequelize, Sequelize.DataTypes);
+require("./models/Prediction.js")(sequelize, Sequelize.DataTypes);
+require("./models/Match.js")(sequelize, Sequelize.DataTypes);
 
 const force = process.argv.includes("--force") || process.argv.includes("-f");
 

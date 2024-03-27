@@ -1,37 +1,36 @@
 module.exports = (sequelize, DataTypes) => {
   return sequelize.define(
-    "Matches",
+    "Prediction",
     {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true,
       },
-      home_team: {
+      user_id: {
         type: DataTypes.STRING,
+        // primaryKey: true,
         allowNull: false,
       },
-      away_team: {
-        type: DataTypes.STRING,
+      match_id: {
+        type: DataTypes.INTEGER,
+        // primaryKey: true,
         allowNull: false,
       },
-      stadium: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      refe: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      home_goals: {
+      user_home_pred: {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      away_goals: {
+      user_away_pred: {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      first_scorer: {
+      user_scorer: {
         type: DataTypes.STRING,
+        allowNull: false,
+      },
+      points_awarded: {
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
     },

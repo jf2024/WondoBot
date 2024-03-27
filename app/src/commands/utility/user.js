@@ -7,7 +7,7 @@ async function createUser(paramUser) {
   const user = member.get(paramUser.id);
 
   if (!user) {
-    const newUser = await db.Users.create({
+    const newUser = await db.User.create({
       user_id: paramUser.id,
       username: paramUser.username,
     });
