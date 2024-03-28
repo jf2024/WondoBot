@@ -13,15 +13,15 @@ module.exports = {
                 // weird formatting is due to Discord's code block formatting, need to use template literals and fix the formatting
                 const formattedInfo = `
                     Next Fixture:
-                    Date: ${matchInfo.date}
-                    Referee: ${matchInfo.referee}
-                    Venue: ${matchInfo.venueName} (${matchInfo.venueCity})
-                    Fixture ID: ${matchInfo.fixtureId}
-                    League: ${matchInfo.leagueName}
-                    Home Team: ${matchInfo.homeTeam}
-                    Away Team: ${matchInfo.awayTeam}
-                    Home Team Goals: ${matchInfo.homeTeamGoals}
-                    Away Team Goals: ${matchInfo.awayTeamGoals}
+Date: ${matchInfo.date}
+Referee: ${matchInfo.referee}
+Venue: ${matchInfo.venueName} (${matchInfo.venueCity})
+Fixture ID: ${matchInfo.fixtureId}
+League: ${matchInfo.leagueName}
+Home Team: ${matchInfo.homeTeam}
+Away Team: ${matchInfo.awayTeam}
+Home Team Goals: ${matchInfo.homeTeamGoals}
+Away Team Goals: ${matchInfo.awayTeamGoals}
                 `;
 
                 await interaction.reply({

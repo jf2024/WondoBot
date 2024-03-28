@@ -129,13 +129,14 @@ async function getFirstScorer() {
 }
 
 // will grab current match 
-// need to adjust so it separates date and time like the fixtures function, maybe make a helper function
+// need to adjust so it separates date and time like the fixtures function, maybe make a helper function for that
+// also with getting current match, do we really need home and away goals since that hasn't happened yet?
 async function getCurrentMatch() {
     try {
 
         // get the current date, use new Date() to go back to normal
 		// currently, messing around with the date
-        const currentDate = new Date("2024-02-05");
+        const currentDate = new Date("2024-03-05");
 
         const fixturesResponse = await axios.request({
             method: "GET",
@@ -196,11 +197,64 @@ async function getCurrentMatch() {
     }
 }
 
+// determine winner as well
+async function getLastMatch() {
+    try {
+        const date = new Date("2024-03-05");
+        const fixturesResponse = await axios.request({
+            method: "GET",
+            url: "https://api-football-v1.p.rapidapi.com/v3/fixtures",
+            params: {
+                season: "2024",
+                team: teamID,
+                from: "2024-02-23",
+                to: "2024-11-20",
+                timezone: "America/Los_Angeles",
+            },
+            headers: {
+                "X-RapidAPI-Key": apiKey,
+                "X-RapidAPI-Host": host,
+            },
+        });
+
+        let lastFixture = null;
+        for (const fixture of fixturesResponse.data.response) {
+            const fixtureDate = new Date(fixture.fixture.date);
+            if (fixtureDate < date) {
+                lastFixture = fixture;
+            } else {
+                break;
+            }
+        }
+
+        if (lastFixture) {
+            return {
+                date: lastFixture.fixture.date,
+                referee: lastFixture.fixture.referee,
+                venueName: lastFixture.fixture.venue.name,
+                venueCity: lastFixture.fixture.venue.city,
+                fixtureId: lastFixture.fixture.id,
+                leagueName: lastFixture.league.name,
+                homeTeam: lastFixture.teams.home.name,
+                awayTeam: lastFixture.teams.away.name,
+                homeTeamGoals: lastFixture.goals.home,
+                awayTeamGoals: lastFixture.goals.away,
+            };
+        } else {
+            console.log("No previous fixtures found.");
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
 getCurrentMatch();
 //getFirstScorer();
 //getFixtures();
 
-module.exports = { getCurrentMatch };
+module.exports = { getCurrentMatch, getLastMatch };
+
 
 
 
