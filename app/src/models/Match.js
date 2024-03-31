@@ -9,32 +9,40 @@ module.exports = (sequelize, DataTypes) => {
       },
       home_team: {
         type: DataTypes.STRING,
-        allowNull: false,
+        // allowNull: false,
       },
       away_team: {
         type: DataTypes.STRING,
-        allowNull: false,
+        // allowNull: false,
       },
       stadium: {
         type: DataTypes.STRING,
-        allowNull: false,
+        // allowNull: false,
       },
       refe: {
         type: DataTypes.STRING,
-        allowNull: false,
+        // allowNull: false,
       },
       home_goals: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        // allowNull: false,
       },
       away_goals: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        // allowNull: false,
       },
       first_scorer: {
         type: DataTypes.STRING,
+        // allowNull: false,
+      },
+      match_finished: {
+        type: DataTypes.BOOLEAN,
         allowNull: false,
       },
+      // date: {
+      //   type: DataTypes.DATE,
+      //   allowNull: false,
+      // }
     },
     {
       timestamps: false,
