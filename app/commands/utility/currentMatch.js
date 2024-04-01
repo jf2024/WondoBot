@@ -14,7 +14,6 @@ module.exports = {
                 const formattedInfo = `
                     Next Fixture:
 Date: ${matchInfo.date}
-Referee: ${matchInfo.referee}
 Venue: ${matchInfo.venueName} (${matchInfo.venueCity})
 Fixture ID: ${matchInfo.fixtureId}
 League: ${matchInfo.leagueName}

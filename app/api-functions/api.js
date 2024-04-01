@@ -11,62 +11,55 @@ Something to note about the fixtures below:
 - need to investigate why some are not in the right time? Maybe its too far out in the future?
 */
 
+//function to separate date and time 
+function formatDateAndTime(dateString) {
+    const date = new Date(dateString);
+    const formattedDate = date.toLocaleDateString();
+    const formattedTime = date.toLocaleTimeString();
+    return `${formattedDate}, ${formattedTime}`;
+}
 
 // grabs all the fixtures/schedule for the SJ team
 async function getFixtures() {
-    	const options = {
-            method: "GET",
-            url: "https://api-football-v1.p.rapidapi.com/v3/fixtures",
-            params: {
-                season: "2024",
-                team: teamID,
-                from: "2024-02-23",
-                to: "2024-11-20",
-                //timezone should be in pacific time
-                timezone: "America/Los_Angeles",
-            },
-            headers: {
-                "X-RapidAPI-Key":
-                    apiKey,
-                "X-RapidAPI-Host": host,
-            },
-        };
-      	try {
-            //console.log(response.data);   //overview of the data
-            const response = await axios.request(options);
+    const options = {
+        method: "GET",
+        url: "https://api-football-v1.p.rapidapi.com/v3/fixtures",
+        params: {
+            season: "2024",
+            team: teamID,
+            from: "2024-02-23",
+            to: "2024-11-20",
+            timezone: "America/Los_Angeles",
+        },
+        headers: {
+            "X-RapidAPI-Key": apiKey,
+            "X-RapidAPI-Host": host,
+        },
+    };
 
-            // first need to order fixutres by date, got a couple of them out of order
-            response.data.response.sort((a, b) => {
-                return new Date(a.fixture.date) - new Date(b.fixture.date);
-            });
+    try {
+        const response = await axios.request(options);
+        const sortedFixtures = response.data.response.sort((a, b) => {
+            return new Date(a.fixture.date) - new Date(b.fixture.date);
+        });
 
-            // now we list all the fixtures/schedule for the team
-            response.data.response.forEach((fixture, index) => {
-                console.log(`Fixture ${index + 1}:`); // the number or index represents the fixture 
+        const formattedFixtures = sortedFixtures
+            .map((fixture) => ({
+                id: fixture.fixture.id,
+                date: formatDateAndTime(fixture.fixture.date),
+                venue: `${fixture.fixture.venue.name}, ${fixture.fixture.venue.city}`,
+                league: fixture.league.name,
+                homeTeam: fixture.teams.home.name,
+                awayTeam: fixture.teams.away.name,
+                homeTeamGoals: fixture.goals.home, 
+                awayTeamGoals: fixture.goals.away, 
+            }));
 
-                // date and time are together so wanna break those two apart
-                const fixtureDate = new Date(fixture.fixture.date);
-                console.log(
-                    `Date: ${fixtureDate.toLocaleDateString()}, Time: ${fixtureDate.toLocaleTimeString()}`
-                );
-
-                // print out the match information
-                console.log(`Referee: ${fixture.fixture.referee}`);
-                console.log(`Venue: ${fixture.fixture.venue.name}`);
-                console.log(`City: ${fixture.fixture.venue.city}`);
-                console.log(`Fixture ID: ${fixture.fixture.id}`);
-                console.log(`League: ${fixture.league.name}`);
-                console.log(`Home Team: ${fixture.teams.home.name}`);
-                console.log(`Away Team: ${fixture.teams.away.name}`);
-                console.log(`Home Team Goals: ${fixture.goals.home}`);
-                console.log(`Away Team Goals: ${fixture.goals.away}`);
-                console.log("\n");
-            });
-
-        } catch (error) {
-    		console.error(error);
-      	}
+        return formattedFixtures;
+    } catch (error) {
+        console.error(error);
     }
+}
 
 // grabs first goal scorer in every game if applicable
 async function getFirstScorer() {
@@ -135,8 +128,8 @@ async function getCurrentMatch() {
     try {
 
         // get the current date, use new Date() to go back to normal
-		// currently, messing around with the date
-        const currentDate = new Date("2024-03-05");
+        // currently, messing around with the date
+        const currentDate = new Date("2024-04-01");
 
         const fixturesResponse = await axios.request({
             method: "GET",
@@ -154,7 +147,6 @@ async function getCurrentMatch() {
             },
         });
 
-        // Find the next fixture after the current date
         let nextFixture = null;
         for (const fixture of fixturesResponse.data.response) {
             const fixtureDate = new Date(fixture.fixture.date);
@@ -164,11 +156,9 @@ async function getCurrentMatch() {
             }
         }
 
-        // Display match information for the next fixture
         if (nextFixture) {
             return {
-                date: nextFixture.fixture.date,
-                referee: nextFixture.fixture.referee,
+                date: formatDateAndTime(nextFixture.fixture.date),
                 venueName: nextFixture.fixture.venue.name,
                 venueCity: nextFixture.fixture.venue.city,
                 fixtureId: nextFixture.fixture.id,
@@ -178,17 +168,6 @@ async function getCurrentMatch() {
                 homeTeamGoals: nextFixture.goals.home,
                 awayTeamGoals: nextFixture.goals.away,
             };
-            // console.log("Next Fixture:");
-            // console.log(`Date: ${nextFixture.fixture.date}`);
-            // console.log(`Referee: ${nextFixture.fixture.referee}`);
-            // console.log(`Venue: ${nextFixture.fixture.venue.name}`);
-            // console.log(`City: ${nextFixture.fixture.venue.city}`);
-            // console.log(`Fixture ID: ${nextFixture.fixture.id}`);
-            // console.log(`League: ${nextFixture.league.name}`);
-            // console.log(`Home Team: ${nextFixture.teams.home.name}`);
-            // console.log(`Away Team: ${nextFixture.teams.away.name}`);
-            // console.log(`Home Team Goals: ${nextFixture.goals.home}`);
-            // console.log(`Away Team Goals: ${nextFixture.goals.away}`);
         } else {
             console.log("No upcoming fixtures.");
         }
@@ -197,10 +176,13 @@ async function getCurrentMatch() {
     }
 }
 
-// determine winner as well
 async function getLastMatch() {
     try {
-        const date = new Date("2024-03-05");
+
+        // get the current date, use new Date() to go back to normal
+        // currently, messing around with the date
+        const currentDate = new Date("2024-04-01");
+
         const fixturesResponse = await axios.request({
             method: "GET",
             url: "https://api-football-v1.p.rapidapi.com/v3/fixtures",
@@ -220,7 +202,7 @@ async function getLastMatch() {
         let lastFixture = null;
         for (const fixture of fixturesResponse.data.response) {
             const fixtureDate = new Date(fixture.fixture.date);
-            if (fixtureDate < date) {
+            if (fixtureDate < currentDate) {
                 lastFixture = fixture;
             } else {
                 break;
@@ -229,8 +211,7 @@ async function getLastMatch() {
 
         if (lastFixture) {
             return {
-                date: lastFixture.fixture.date,
-                referee: lastFixture.fixture.referee,
+                date: formatDateAndTime(lastFixture.fixture.date),
                 venueName: lastFixture.fixture.venue.name,
                 venueCity: lastFixture.fixture.venue.city,
                 fixtureId: lastFixture.fixture.id,
@@ -248,12 +229,66 @@ async function getLastMatch() {
     }
 }
 
+//some template for later getting player's photos 
 
-getCurrentMatch();
+// const { Client, GatewayIntentBits, MessageEmbed, SlashCommandBuilder } = require('discord.js');
+// const axios = require('axios');
+
+// const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+// const getPlayerPhoto = async () => {
+//   const options = {
+//     method: 'GET',
+//     url: 'https://api-football-v1.p.rapidapi.com/v3/players/squads',
+//     params: { team: '1596' },
+//     headers: {
+//       'X-RapidAPI-Key': '5ec343875cmsh21a84d547184a43p1b6d5ajsn65156d649b0d',
+//       'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
+//     }
+//   };
+
+//   try {
+//     const response = await axios.request(options);
+//     const playerPhotos = response.data.response.map((player) => {
+//       const embed = new MessageEmbed()
+//         .setTitle(`${player.player.name}`)
+//         .setImage(player.player.photo);
+//       return embed;
+//     });
+//     return playerPhotos;
+//   } catch (error) {
+//     console.error(error);
+//     return ['An error occurred while fetching player photos.'];
+//   }
+// };
+
+// client.on('ready', () => {
+//   console.log(`Logged in as ${client.user.tag}!`);
+
+//   const getPlayerPhotoCommand = new SlashCommandBuilder()
+//     .setName('getplayerphoto')
+//     .setDescription('Get photos of players from a team');
+
+//   client.application.commands.set([getPlayerPhotoCommand]);
+// });
+
+// client.on('interactionCreate', async (interaction) => {
+//   if (!interaction.isCommand()) return;
+
+//   if (interaction.commandName === 'getplayerphoto') {
+//     const playerPhotos = await getPlayerPhoto();
+//     await interaction.reply({ embeds: playerPhotos });
+//   }
+// });
+
+// client.login('YOUR_BOT_TOKEN');
+
+
+//getCurrentMatch();
 //getFirstScorer();
 //getFixtures();
 
-module.exports = { getCurrentMatch, getLastMatch };
+module.exports = { getCurrentMatch, getLastMatch, getFixtures };
 
 
 

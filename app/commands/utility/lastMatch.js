@@ -24,7 +24,6 @@ module.exports = {
             if (lastMatchInfo) {
                 const formattedInfo = `Last Match Information:
 Date: ${lastMatchInfo.date}
-Referee: ${lastMatchInfo.referee}
 Venue: ${lastMatchInfo.venueName} (${lastMatchInfo.venueCity})
 Fixture ID: ${lastMatchInfo.fixtureId}
 League: ${lastMatchInfo.leagueName}
