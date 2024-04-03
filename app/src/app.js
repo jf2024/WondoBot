@@ -7,6 +7,8 @@ const { token } = require("../../config.json");
 // Require the necessary discord.js classes
 const db = require("./dbObjects.js");
 
+// TODO: Use setInterval() here
+
 // Create a new client instance
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],

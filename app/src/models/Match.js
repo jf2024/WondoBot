@@ -7,6 +7,10 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
         autoIncrement: true,
       },
+      fixture_id: {
+        type: DataTypes.STRING,
+        // allowNull: false,
+      },
       home_team: {
         type: DataTypes.STRING,
         // allowNull: false,
@@ -19,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         // allowNull: false,
       },
-      refe: {
+      referee: {
         type: DataTypes.STRING,
         // allowNull: false,
       },
@@ -35,14 +39,18 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         // allowNull: false,
       },
-      match_finished: {
+      date: {
+        type: DataTypes.DATE,
+        // allowNull: false,
+      },
+      // time: {
+      //   type: DataTypes.TIME,
+      //   // allowNull: false,
+      // },
+      finished: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
       },
-      // date: {
-      //   type: DataTypes.DATE,
-      //   allowNull: false,
-      // }
     },
     {
       timestamps: false,

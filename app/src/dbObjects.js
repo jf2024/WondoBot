@@ -8,6 +8,10 @@ const sequelize = new Sequelize("wondo_database", "user", "password", {
 
 const User = require("./models/User.js")(sequelize, Sequelize.DataTypes);
 const Match = require("./models/Match.js")(sequelize, Sequelize.DataTypes);
+const CurrentMatch = require("./models/CurrentMatch.js")(
+  sequelize,
+  Sequelize.DataTypes
+);
 const Prediction = require("./models/Prediction.js")(
   sequelize,
   Sequelize.DataTypes
@@ -25,6 +29,8 @@ Prediction.belongsTo(User, { foreignKey: "user_id" });
 Match.belongsTo(Prediction, { foreignKey: "id" });
 Prediction.hasOne(Match, { foreignKey: "id" });
 // all predictions for one match point to one match identity in match table
+
+CurrentMatch.belongsTo(Match, { foreignKey: "id" });
 
 Reflect.defineProperty(User.prototype, "createPrediction", {
   value: async (params) => {
@@ -122,4 +128,4 @@ Reflect.defineProperty(User.prototype, "getPredictions", {
 //   },
 // });
 
-module.exports = { User, Match, Prediction };
+module.exports = { User, CurrentMatch, Match, Prediction };
