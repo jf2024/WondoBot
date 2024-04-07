@@ -19,6 +19,7 @@ const User = require("./models/User.js")(sequelize, Sequelize.DataTypes);
 require("./models/Prediction.js")(sequelize, Sequelize.DataTypes);
 require("./models/Match.js")(sequelize, Sequelize.DataTypes);
 require("./models/CurrentMatch.js")(sequelize, Sequelize.DataTypes);
+const PredictCurrent = require("./models/PredictCurrent.js")(sequelize, Sequelize.DataTypes);
 
 const force = process.argv.includes("--force") || process.argv.includes("-f");
 

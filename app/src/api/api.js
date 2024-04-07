@@ -100,8 +100,8 @@ async function getFixtures() {
 
   try {
     const response = await axios.request(options);
+    const fixturesObject = { data: [] };
 
-    // Iterate through each fixture
     for (const fixture of response.data.response) {
       let finished;
       const fixtureDate = new Date(fixture.fixture.date);
@@ -109,10 +109,8 @@ async function getFixtures() {
       // Check if the fixture is finished
       fixtureDate < new Date() ? (finished = true) : (finished = false);
 
-      const dateToString = fixtureDate.toLocaleString("en-US", {
-        timeZone: "America/Los_Angeles",
-      });
-      const fixtureIdToString = fixture.fixture.id.toString() ?? "N/A";
+      const date = fixtureDate.toLocaleDateString("en-US", { timeZone: "America/Los_Angeles" });
+      const kickoffTime = fixtureDate.toLocaleTimeString("en-US", { timeZone: "America/Los_Angeles" });
 
       // Initialize first_scorer to null
       let first_scorer = null;
@@ -144,7 +142,7 @@ async function getFixtures() {
 
       // Add fixture information to fixturesObject
       fixturesObject.data.push({
-        fixture_id: fixtureIdToString,
+        fixture_id: fixture.fixture.id.toString(),
         home_team: fixture.teams.home.name,
         away_team: fixture.teams.away.name,
         stadium: fixture.fixture.venue.name,
@@ -152,16 +150,18 @@ async function getFixtures() {
         home_goals: fixture.goals.home,
         away_goals: fixture.goals.away,
         first_scorer: first_scorer,
-        date: dateToString,
+        date: date,
+        kickoff: kickoffTime,
+        league: fixture.league.name,
         finished: finished,
       });
     }
+
+    return fixturesObject;
   } catch (error) {
     console.error(error);
+    return null;
   }
-
-  console.log(fixturesObject);
-  return fixturesObject;
 }
 
       // print out the match information

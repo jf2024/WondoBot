@@ -22,6 +22,7 @@ const Prediction = require("./models/Prediction.js")(
   Sequelize.DataTypes
 );
 const Match = require("./models/Match.js")(sequelize, Sequelize.DataTypes);
+const PredictCurrent = require("./models/PredictCurrent.js")(sequelize, Sequelize.DataTypes);
 
 const force = process.argv.includes("--force") || process.argv.includes("-f");
 

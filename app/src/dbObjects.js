@@ -16,6 +16,9 @@ const Prediction = require("./models/Prediction.js")(
   sequelize,
   Sequelize.DataTypes
 );
+const PredictCurrent = require("./models/PredictCurrent.js")(sequelize, Sequelize.DataTypes);
+
+
 
 // users have many predicts ; predictions hold a match
 
