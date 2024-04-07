@@ -99,34 +99,70 @@ async function getFixtures() {
   const fixturesObject = { data: [] };
 
   try {
-    //console.log(response.data);   //overview of the data
     const response = await axios.request(options);
 
-    // first need to order fixutres by date, got a couple of them out of order
-    // response.data.response.sort((a, b) => {
-    //   return new Date(a.fixture.date) - new Date(b.fixture.date);
-    // });
-
-    // now we list all the fixtures/schedule for the team
-    response.data.response.forEach((fixture, index) => {
+    // Iterate through each fixture
+    for (const fixture of response.data.response) {
       let finished;
-      // console.log(`Fixture ${index + 1}:`); // the number or index represents the fixture
-
-      // date and time are together so wanna break those two apart
       const fixtureDate = new Date(fixture.fixture.date);
-      // console.log(
-      //   `Date: ${fixtureDate.toLocaleDateString()}, Time: ${fixtureDate.toLocaleTimeString()}`
-      // );
 
+      // Check if the fixture is finished
       fixtureDate < new Date() ? (finished = true) : (finished = false);
 
       const dateToString = fixtureDate.toLocaleString("en-US", {
         timeZone: "America/Los_Angeles",
       });
-      // const timeToString = fixtureDate.toLocaleTimeString("en-US", {
-      //   timeZone: "America/Los_Angeles",
-      // });
       const fixtureIdToString = fixture.fixture.id.toString() ?? "N/A";
+
+      // Initialize first_scorer to null
+      let first_scorer = null;
+
+      // If the fixture is finished, try to fetch the first scorer
+      if (finished) {
+        const eventsResponse = await axios.request({
+          method: "GET",
+          url: "https://api-football-v1.p.rapidapi.com/v3/fixtures/events",
+          params: {
+            fixture: fixture.fixture.id,
+            team: teamID,
+            type: "Goal",
+          },
+          headers: {
+            "X-RapidAPI-Key": apiKey,
+            "X-RapidAPI-Host": host,
+          },
+        });
+
+        const firstGoal = eventsResponse.data.response.find(
+          (event) => event.type === "Goal"
+        );
+
+        if (firstGoal) {
+          first_scorer = firstGoal.player.name;
+        }
+      }
+
+      // Add fixture information to fixturesObject
+      fixturesObject.data.push({
+        fixture_id: fixtureIdToString,
+        home_team: fixture.teams.home.name,
+        away_team: fixture.teams.away.name,
+        stadium: fixture.fixture.venue.name,
+        referee: fixture.fixture.referee,
+        home_goals: fixture.goals.home,
+        away_goals: fixture.goals.away,
+        first_scorer: first_scorer,
+        date: dateToString,
+        finished: finished,
+      });
+    }
+  } catch (error) {
+    console.error(error);
+  }
+
+  console.log(fixturesObject);
+  return fixturesObject;
+}
 
       // print out the match information
       // console.log(`Referee: ${fixture.fixture.referee}`);
@@ -140,29 +176,29 @@ async function getFixtures() {
       // console.log(`Away Team Goals: ${fixture.goals.away}`);
       // console.log("\n");
 
-      fixturesObject.data.push({
-        fixture_id: fixtureIdToString,
-        home_team: fixture.teams.home.name,
-        away_team: fixture.teams.away.name,
-        stadium: fixture.fixture.venue.name,
-        referee: fixture.fixture.referee,
-        home_goals: fixture.goals.home,
-        away_goals: fixture.goals.away,
-        first_scorer: null,
-        date: dateToString,
-        // time: timeToString,
-        finished: finished,
-      });
-    });
+//       fixturesObject.data.push({
+//         fixture_id: fixtureIdToString,
+//         home_team: fixture.teams.home.name,
+//         away_team: fixture.teams.away.name,
+//         stadium: fixture.fixture.venue.name,
+//         referee: fixture.fixture.referee,
+//         home_goals: fixture.goals.home,
+//         away_goals: fixture.goals.away,
+//         first_scorer: null,
+//         date: dateToString,
+//         // time: timeToString,
+//         finished: finished,
+//       });
+//     });
 
-    // console.log(response.data.response);
-  } catch (error) {
-    console.error(error);
-  }
+//     // console.log(response.data.response);
+//   } catch (error) {
+//     console.error(error);
+//   }
 
-  console.log(fixturesObject);
-  return fixturesObject;
-}
+//   console.log(fixturesObject);
+//   return fixturesObject;
+// }
 
 // grabs first goal scorer in every game if applicable
 async function getFirstScorer() {
@@ -214,6 +250,12 @@ async function getFirstScorer() {
       if (goalscorer) {
         console.log(`Name: ${goalscorer.player.name}`);
         console.log(`ID: ${goalscorer.player.id}`);
+
+        // Update the first_scorer field in the database
+        const match = await db.CurrentMatch.findOne({ where: { fixture_id: fixtureID } });
+        if (match) {
+          await match.update({ first_scorer: goalscorer.player.name });
+        }
       } else {
         console.log("No goalscorer found for this fixture.");
       }
@@ -223,6 +265,22 @@ async function getFirstScorer() {
     console.error(error);
   }
 }
+
+//       console.log(
+//         `First goalscorer for Fixture ${fixtureID} against ${opponentTeam}:`
+//       );
+//       if (goalscorer) {
+//         console.log(`Name: ${goalscorer.player.name}`);
+//         console.log(`ID: ${goalscorer.player.id}`);
+//       } else {
+//         console.log("No goalscorer found for this fixture.");
+//       }
+//       console.log("\n");
+//     }
+//   } catch (error) {
+//     console.error(error);
+//   }
+// }
 
 // will grab current match
 // need to adjust so it separates date and time like the fixtures function, maybe make a helper function
