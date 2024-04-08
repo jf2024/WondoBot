@@ -53,5 +53,19 @@ your score:  9.5% out of 10% = 95% which is an A
 
 Another good job here!
 
-Make the changes as suggested above, including many more requirements for
-the second submission and you'll get the full 10% on this document.
+Make the changes as suggested above for the second submission and you'll get
+the full 10% on this document.
+
+=============================================================================
+SECOND EVALUATION:
+
+your score:  10% out of 10% = 100% which is an A-plus
+
+The Schedule section looks better, with the new Gantt chart being somewhat
+easier to read.  Still, the black background and size of the text makes it
+hard to decipher without a lot of zooming and scrolling.  I do like the new
+addition of the WIP board ~ nice job there.
+
+Good work on changing to present tense.
+
+I think you've got the idea now!

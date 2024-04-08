@@ -46,3 +46,19 @@ document you need to have "shall" statements for the requirements.
 
 Make the changes as suggested above, including many more requirements for
 the second submission and you'll get the full 10% on this document.
+
+=============================================================================
+SECOND EVALUATION:
+
+your score:  9.5% out of 10% = 95% which is an A
+
+You made the specific changes as required, chaning the language to numbered
+"shall" statements.  However, you didn't add any more requirements to the
+document and the performance requirements are still bullets, not numbered.
+
+I do like and appreciate the addition of the 'Future Enhancements' section ~
+that is a great idea!
+
+Unfortunately, since the focus of the comments on functional and performance
+sections included adding more requirements which was not addressed, I can't
+give you 100%.
