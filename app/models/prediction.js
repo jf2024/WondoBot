@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
         "prediction",
         {
             user_id: {
-                type: DataTypes.STRING,
+                type: DataTypes.INTEGER,
                 autoIncrement: true,
             },
             user_id: {

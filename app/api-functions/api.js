@@ -43,17 +43,22 @@ async function getFixtures() {
             return new Date(a.fixture.date) - new Date(b.fixture.date);
         });
 
-        const formattedFixtures = sortedFixtures
-            .map((fixture) => ({
-                id: fixture.fixture.id,
-                date: formatDateAndTime(fixture.fixture.date),
-                venue: `${fixture.fixture.venue.name}, ${fixture.fixture.venue.city}`,
-                league: fixture.league.name,
-                homeTeam: fixture.teams.home.name,
-                awayTeam: fixture.teams.away.name,
-                homeTeamGoals: fixture.goals.home, 
-                awayTeamGoals: fixture.goals.away, 
-            }));
+        const formattedFixtures = sortedFixtures.map((fixture) => {
+        const formattedDate = formatDateAndTime(fixture.fixture.date);
+        const [date, time] = formattedDate.split(', ');
+
+        return {
+            id: fixture.fixture.id,
+            date: date, // Separate date
+            time: time, // Separate time
+            venue: `${fixture.fixture.venue.name}, ${fixture.fixture.venue.city}`,
+            league: fixture.league.name,
+            homeTeam: fixture.teams.home.name,
+            awayTeam: fixture.teams.away.name,
+            homeTeamGoals: fixture.goals.home,
+            awayTeamGoals: fixture.goals.away,
+        };
+    });
 
         return formattedFixtures;
     } catch (error) {
