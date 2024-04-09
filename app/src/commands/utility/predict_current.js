@@ -19,6 +19,18 @@ module.exports = {
     // Find the next/current match
     const match = await findNextMatch();
 
+    let user = await db.User.findOne({
+      where: { user_id: interaction.user.id },
+    });
+
+    if (user === null) {
+      user = await db.User.create({
+        user_id: interaction.user.id,
+        username: interaction.user.username,
+      });
+      console.log(user);
+    }
+
     // Check if match is found
     if (!match) {
       return interaction.reply("No upcoming matches available for prediction.");
@@ -43,11 +55,27 @@ module.exports = {
     // Format the team names for the current match
     const teamNames = `${match.home_team} vs ${match.away_team}`;
     // Assume 'kickoff' and 'league' are properties of the 'match' object
-    const kickoff = match.kickoff ?? "Not available yet.";
+    const kickoff = match.kickoff ? match.kickoff.toLocaleTimeString() : "Not available yet.";
     const league = match.league ?? "Not available yet.";
-    // Respond with information about the current match
+
+    const newPrediction = await user.createPredictCurrent({
+      user_id: interaction.user.id,
+      match: teamNames,
+      date: match.date,
+      kickoff: match.kickoff,
+      competition: league,
+    });
+    
+    // // Respond with information about the current match
+    // await db.PredictCurrent.create({
+    //   match: teamNames,
+    //   date: match.date,
+    //   kickoff: kickoff,
+    //   competition: league
+    // });
+
     return interaction.reply(
-      `Match: ${teamNames}\nDate: ${match.date ?? "Not available yet."}\nKick-off: ${kickoff}\nCompetition: ${league}`
+      `prediction is :${newPrediction.user_id}, Match: ${newPrediction.teamNames}\nDate: ${newPrediction.match.date ?? "Not available yet."}\nKick-off: ${newPrediction.kickoff}\nCompetition: ${newPrediction.league}`
     );
   },
 };

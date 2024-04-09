@@ -14,11 +14,12 @@ const CurrentMatch = require("./models/CurrentMatch.js")(
 );
 const Prediction = require("./models/Prediction.js")(
   sequelize,
+  Sequelize.DataTypes 
+);
+
+const PredictCurrent = require("./models/PredictCurrent.js")(sequelize,
   Sequelize.DataTypes
 );
-const PredictCurrent = require("./models/PredictCurrent.js")(sequelize, Sequelize.DataTypes);
-
-
 
 // users have many predicts ; predictions hold a match
 
@@ -28,6 +29,9 @@ const PredictCurrent = require("./models/PredictCurrent.js")(sequelize, Sequeliz
 
 User.hasMany(Prediction, { foreignKey: "user_id" });
 Prediction.belongsTo(User, { foreignKey: "user_id" });
+
+User.hasMany(PredictCurrent, { foreignKey: "user_id" });
+PredictCurrent.belongsTo(User, { foreignKey: "user_id" });
 
 Match.belongsTo(Prediction, { foreignKey: "id" });
 Prediction.hasOne(Match, { foreignKey: "id" });
@@ -131,4 +135,4 @@ Reflect.defineProperty(User.prototype, "getPredictions", {
 //   },
 // });
 
-module.exports = { User, CurrentMatch, Match, Prediction };
+module.exports = { User, CurrentMatch, Match, Prediction, PredictCurrent };
