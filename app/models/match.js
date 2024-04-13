@@ -1,51 +1,55 @@
 module.exports = (sequelize, DataTypes) => {
     return sequelize.define(
-        "matches",
+        "Match",
         {
-            match_id: {
+            id: {
                 type: DataTypes.INTEGER,
                 primaryKey: true,
                 autoIncrement: true,
             },
+            fixture_id: {
+                type: DataTypes.STRING,
+                //allowNull: false,
+            },
             home_team: {
                 type: DataTypes.STRING,
-                allowNull: false,
+                //allowNull: false,
             },
             away_team: {
                 type: DataTypes.STRING,
-                allowNull: false,
+                //allowNull: false,
             },
             stadium: {
                 type: DataTypes.STRING,
-                allowNull: false,
+                //allowNull: false,
             },
             home_goals: {
                 type: DataTypes.INTEGER,
 				defaultValue: 0,
-                allowNull: false,
+                //allowNull: false,
             },
             away_goals: {
                 type: DataTypes.INTEGER,
 				defaultValue: 0,
-                allowNull: false,
+                //allowNull: false,
             },
             first_scorer: {
                 type: DataTypes.STRING,
 				defaultValue: "No One",
-                allowNull: false,
+                //allowNull: false,
             },
-            match_finished: {
-                type: DataTypes.BOOLEAN,
-                allowNull: false,
-            },
-			time: {
-				type: DataTypes.DATE,
-				allowNull: false,
-			},
             date: {
               type: DataTypes.DATE,
-              allowNull: false,
-            }
+              //allowNull: false,
+            },
+            time: {
+              type: DataTypes.TIME,
+              //allowNull: false,
+            },
+            finished: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: false,
+            },
         },
         {
             timestamps: false,

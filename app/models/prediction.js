@@ -2,13 +2,13 @@ module.exports = (sequelize, DataTypes) => {
     return sequelize.define(
         "prediction",
         {
-            user_id: {
+            id: {
                 type: DataTypes.INTEGER,
+                primaryKey: true,
                 autoIncrement: true,
             },
             user_id: {
                 type: DataTypes.STRING,
-                // primaryKey: true,
                 allowNull: false,
             },
             match_id: {
