@@ -77,7 +77,6 @@ Something to note about the fixtures below:
 - need to investigate why some are not in the right time? Maybe its too far out in the future?
 */
 
-// grabs all the fixtures/schedule for the SJ team
 async function getFixtures() {
   const options = {
     method: "GET",
@@ -100,7 +99,6 @@ async function getFixtures() {
 
   try {
     const response = await axios.request(options);
-    const fixturesObject = { data: [] };
 
     for (const fixture of response.data.response) {
       let finished;
@@ -109,8 +107,9 @@ async function getFixtures() {
       // Check if the fixture is finished
       fixtureDate < new Date() ? (finished = true) : (finished = false);
 
+      // Extract date and time separately
       const date = fixtureDate.toLocaleDateString("en-US", { timeZone: "America/Los_Angeles" });
-      const kickoffTime = fixtureDate.toLocaleTimeString("en-US", { timeZone: "America/Los_Angeles" });
+      const time = fixtureDate.toLocaleTimeString("en-US", { timeZone: "America/Los_Angeles" });
 
       // Initialize first_scorer to null
       let first_scorer = null;
@@ -131,9 +130,7 @@ async function getFixtures() {
           },
         });
 
-        const firstGoal = eventsResponse.data.response.find(
-          (event) => event.type === "Goal"
-        );
+        const firstGoal = eventsResponse.data.response.find((event) => event.type === "Goal");
 
         if (firstGoal) {
           first_scorer = firstGoal.player.name;
@@ -150,8 +147,8 @@ async function getFixtures() {
         home_goals: fixture.goals.home,
         away_goals: fixture.goals.away,
         first_scorer: first_scorer,
-        date: date,
-        kickoff: kickoffTime,
+        date: date, // Date field
+        time: time, // Time field
         league: fixture.league.name,
         finished: finished,
       });

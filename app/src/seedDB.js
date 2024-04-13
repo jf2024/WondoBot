@@ -63,7 +63,8 @@ sequelize
           away_goals: match.away_goals,
           first_scorer: match.first_scorer,
           date: match.date,
-          //   time: match.time,
+          kickoff: match.time,
+          competition: match.league.name,
           finished: match.finished,
         });
       })

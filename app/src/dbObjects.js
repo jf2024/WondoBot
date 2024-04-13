@@ -30,8 +30,8 @@ const PredictCurrent = require("./models/PredictCurrent.js")(sequelize,
 User.hasMany(Prediction, { foreignKey: "user_id" });
 Prediction.belongsTo(User, { foreignKey: "user_id" });
 
-User.hasMany(PredictCurrent, { foreignKey: "user_id" });
-PredictCurrent.belongsTo(User, { foreignKey: "user_id" });
+// User.hasMany(PredictCurrent, { foreignKey: "user_id" });
+// PredictCurrent.belongsTo(User, { foreignKey: "user_id" });
 
 Match.belongsTo(Prediction, { foreignKey: "id" });
 Prediction.hasOne(Match, { foreignKey: "id" });
