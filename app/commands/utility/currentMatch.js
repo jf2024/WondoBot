@@ -1,40 +1,75 @@
 const { SlashCommandBuilder } = require("discord.js");
-const { getCurrentMatch } = require("../../api-functions/api"); 
+const { Match } = require("../../dbOjects.js");
+const { Op } = require("sequelize");
+
+/*
+surely theres a better way to do this in less code
+*/
+async function findMatch() {
+    try {
+        const currentDate = new Date(); 
+        console.log("Current date:", currentDate.toLocaleDateString());
+        console.log("Current time:", currentDate.toLocaleTimeString());
+
+        const nextMatch = await Match.findOne({
+            where: {
+                [Op.and]: [
+                    {
+                        date: {
+                            [Op.gte]: currentDate.toLocaleDateString(),
+                        },
+                    },
+                    {
+                        [Op.or]: [
+                            {
+                                date: currentDate.toLocaleDateString(),
+                                time: {
+                                    [Op.gte]: currentDate.toLocaleTimeString(),
+                                },
+                            },
+                            {
+                                date: {
+                                    [Op.gt]: currentDate.toLocaleDateString(),
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+            order: [
+                ["date", "ASC"],
+                ["time", "ASC"],
+            ],
+            limit: 1,
+        });
+
+        console.log("Next match:", nextMatch);
+        return nextMatch;
+    } catch (error) {
+        console.error("Error finding upcoming match:", error);
+        return null;
+    }
+}
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName("currentmatch")
-        .setDescription("Get information about the next match coming up"),
+        .setName("thismatch")
+        .setDescription("Provides information about the upcoming match."),
     async execute(interaction) {
-        try {
-            const matchInfo = await getCurrentMatch(); // Await the promise resolution
-            if (matchInfo) {
-                // Format the matchInfo as needed
-                // weird formatting is due to Discord's code block formatting, need to use template literals and fix the formatting
-                const formattedInfo = `
-                    Next Fixture:
-Date: ${matchInfo.date}
-Venue: ${matchInfo.venueName} (${matchInfo.venueCity})
-Fixture ID: ${matchInfo.fixtureId}
-League: ${matchInfo.leagueName}
-Home Team: ${matchInfo.homeTeam}
-Away Team: ${matchInfo.awayTeam}
-Home Team Goals: ${matchInfo.homeTeamGoals}
-Away Team Goals: ${matchInfo.awayTeamGoals}
-                `;
-
-                await interaction.reply({
-                    content: formattedInfo,
-                });
-            } else {
-                await interaction.reply("No match information available.");
-            }
-        } catch (error) {
-            console.error("Error fetching match data:", error);
-            await interaction.reply(
-                "An error occurred while fetching match data."
+        const match = await findMatch();
+        if (!match) {
+            return interaction.reply(
+                "San Jose Earthquakes seem to not be playing anytime soon. No matches available."
             );
         }
+        //need to format the time and date better
+        return interaction.reply(
+            `Home Team: ${match.home_team} 
+            Away Team: ${match.away_team} 
+            Date: ${match.date} 
+            Venue: ${match.stadium} 
+            League: ${match.league}
+            Time: ${match.time}`
+        );
     },
 };
-

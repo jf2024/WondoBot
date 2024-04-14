@@ -19,32 +19,36 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 //allowNull: false,
             },
+            league: {
+                type: DataTypes.STRING,
+                //allowNull: false,
+            },
             stadium: {
                 type: DataTypes.STRING,
                 //allowNull: false,
             },
             home_goals: {
                 type: DataTypes.INTEGER,
-				defaultValue: 0,
+                defaultValue: 0,
                 //allowNull: false,
             },
             away_goals: {
                 type: DataTypes.INTEGER,
-				defaultValue: 0,
+                defaultValue: 0,
                 //allowNull: false,
             },
             first_scorer: {
                 type: DataTypes.STRING,
-				defaultValue: "No One",
+                defaultValue: "No One",
                 //allowNull: false,
             },
             date: {
-              type: DataTypes.DATE,
-              //allowNull: false,
+                type: DataTypes.DATE,
+                //allowNull: false,
             },
             time: {
-              type: DataTypes.TIME,
-              //allowNull: false,
+                type: DataTypes.TIME, 
+                //allowNull: false,
             },
             finished: {
                 type: DataTypes.BOOLEAN,
@@ -52,6 +56,7 @@ module.exports = (sequelize, DataTypes) => {
             },
         },
         {
+            tableName: "Match",
             timestamps: false,
         }
     );
