@@ -1,38 +1,32 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const { Match } = require("../../dbOjects.js");
 const { Op } = require("sequelize");
 
-/*
-surely theres a better way to do this in less code
-*/
 async function findMatch() {
     try {
-        const currentDate = new Date(); 
+        const currentDate = new Date(); // Current date and time
         console.log("Current date:", currentDate.toLocaleDateString());
         console.log("Current time:", currentDate.toLocaleTimeString());
 
+        const gracePeriodMinutes = 135; // 2 hours and 15 minutes
+        const gracePeriodEnd = new Date(
+            currentDate.getTime() + gracePeriodMinutes * 60000
+        );
+
         const nextMatch = await Match.findOne({
             where: {
-                [Op.and]: [
+                [Op.or]: [
                     {
                         date: {
-                            [Op.gte]: currentDate.toLocaleDateString(),
+                            [Op.gt]: currentDate,
                         },
                     },
                     {
-                        [Op.or]: [
-                            {
-                                date: currentDate.toLocaleDateString(),
-                                time: {
-                                    [Op.gte]: currentDate.toLocaleTimeString(),
-                                },
-                            },
-                            {
-                                date: {
-                                    [Op.gt]: currentDate.toLocaleDateString(),
-                                },
-                            },
-                        ],
+                        date: currentDate.toLocaleDateString(),
+                        time: {
+                            [Op.gte]: currentDate.toLocaleTimeString(),
+                            [Op.lte]: gracePeriodEnd.toLocaleTimeString(),
+                        },
                     },
                 ],
             },
@@ -51,9 +45,15 @@ async function findMatch() {
     }
 }
 
+function formatTime(time) {
+    const [hours, minutes] = time.split(":");
+    const formattedHours = hours % 12 || 12;
+    return `${formattedHours}:${minutes} ${hours < 12 ? "AM" : "PM"}`;
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName("thismatch")
+        .setName("predict-current")
         .setDescription("Provides information about the upcoming match."),
     async execute(interaction) {
         const match = await findMatch();
@@ -62,14 +62,27 @@ module.exports = {
                 "San Jose Earthquakes seem to not be playing anytime soon. No matches available."
             );
         }
-        //need to format the time and date better
-        return interaction.reply(
-            `Home Team: ${match.home_team} 
-            Away Team: ${match.away_team} 
-            Date: ${match.date} 
-            Venue: ${match.stadium} 
-            League: ${match.league}
-            Time: ${match.time}`
-        );
+
+        const date = new Date(match.date).toLocaleDateString("en-US", {
+            timeZone: "America/Los_Angeles",
+            weekday: "short",
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+        });
+        const time = formatTime(match.time);
+
+        const embed = new EmbedBuilder()
+            .setTitle(`🗓️ Current Match`)
+            .setDescription(
+                `**Match:** ${match.home_team} vs ${match.away_team}\n**Date:** ${date} ${time}\n**Venue:** ${match.stadium}\n**League:** ${match.league}`
+            )
+            //figure out a different way to get the logo\
+            //currently just posting picture on server where bot is located and copying that link onto here
+            .setThumbnail(
+                "https://cdn.discordapp.com/attachments/1228944144714436709/1228944263354777640/mls-logo.png?ex=662de289&is=661b6d89&hm=d4f33f8d0a029f4625aeb4b280f629219de2446623f0dfbef63951bbd3cd8322&"
+            ); 
+
+        return interaction.reply({ embeds: [embed] });
     },
 };
