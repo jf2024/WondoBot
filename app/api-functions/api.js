@@ -130,61 +130,6 @@ async function getFirstScorer() {
     }
 }
 
-// will grab current match 
-// need to adjust so it separates date and time like the fixtures function, maybe make a helper function for that
-// also with getting current match, do we really need home and away goals since that hasn't happened yet?
-async function getCurrentMatch() {
-    try {
-
-        // get the current date, use new Date() to go back to normal
-        // currently, messing around with the date
-        const currentDate = new Date("2024-04-01");
-
-        const fixturesResponse = await axios.request({
-            method: "GET",
-            url: "https://api-football-v1.p.rapidapi.com/v3/fixtures",
-            params: {
-                season: "2024",
-                team: teamID,
-                from: "2024-02-23",
-                to: "2024-11-20",
-                timezone: "America/Los_Angeles",
-            },
-            headers: {
-                "X-RapidAPI-Key": apiKey,
-                "X-RapidAPI-Host": host,
-            },
-        });
-
-        let nextFixture = null;
-        for (const fixture of fixturesResponse.data.response) {
-            const fixtureDate = new Date(fixture.fixture.date);
-            if (fixtureDate > currentDate) {
-                nextFixture = fixture;
-                break;
-            }
-        }
-
-        if (nextFixture) {
-            return {
-                date: formatDateAndTime(nextFixture.fixture.date),
-                venueName: nextFixture.fixture.venue.name,
-                venueCity: nextFixture.fixture.venue.city,
-                fixtureId: nextFixture.fixture.id,
-                leagueName: nextFixture.league.name,
-                homeTeam: nextFixture.teams.home.name,
-                awayTeam: nextFixture.teams.away.name,
-                homeTeamGoals: nextFixture.goals.home,
-                awayTeamGoals: nextFixture.goals.away,
-            };
-        } else {
-            console.log("No upcoming fixtures.");
-        }
-    } catch (error) {
-        console.error(error);
-    }
-}
-
 async function getLastMatch() {
     try {
 
@@ -297,7 +242,7 @@ async function getLastMatch() {
 //getFirstScorer();
 //getFixtures();
 
-module.exports = { getCurrentMatch, getLastMatch, getFixtures };
+module.exports = { getLastMatch, getFixtures };
 
 
 
