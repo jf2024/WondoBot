@@ -54,7 +54,7 @@ async function getFixtures() {
                 league: fixture.league.name,
                 home_goals: fixture.goals.home,
                 away_goals: fixture.goals.away,
-                first_scorer: null,
+                first_scorer: "No goal scorer", //getFirstScorer(fixture.fixture.id)
                 date: date,
                 time: time,
                 finished: fixture.fixture.status.short === "FT",
@@ -68,120 +68,31 @@ async function getFixtures() {
     return fixturesObject;
 }
 
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
 // grabs first goal scorer in every game if applicable
-async function getFirstScorer() {
+async function getFirstScorer(fixtureID) {
+    const options = {
+        method: "GET",
+        url: "https://api-football-v1.p.rapidapi.com/v3/fixtures/events",
+        params: {
+            fixture: fixtureID,
+            team: teamID,
+            type: "Goal",
+        },
+        headers: {
+            "X-RapidAPI-Key": apiKey,
+            "X-RapidAPI-Host": host,
+        },
+    };
+
     try {
-        const fixturesResponse = await axios.request({
-            method: "GET",
-            url: "https://api-football-v1.p.rapidapi.com/v3/fixtures",
-            params: {
-                season: "2024",
-                team: teamID,
-                from: "2024-02-23",
-                to: "2024-10-20",
-                timezone: "America/Los_Angeles",
-            },
-            headers: {
-                "X-RapidAPI-Key": apiKey,
-                "X-RapidAPI-Host": host,
-            },
-        });
-
-        for (const fixture of fixturesResponse.data.response) {
-            const fixtureID = fixture.fixture.id;
-            const homeTeam = fixture.teams.home.name;
-            const awayTeam = fixture.teams.away.name;
-
-            // get the opponent team
-            const opponentTeam =
-                homeTeam === "San Jose Earthquakes" ? awayTeam : homeTeam;
-
-            const eventsResponse = await axios.request({
-                method: "GET",
-                url: "https://api-football-v1.p.rapidapi.com/v3/fixtures/events",
-                params: {
-                    fixture: fixtureID,	
-                    team: teamID,	
-                    type: "Goal",
-                },
-                headers: {
-                    "X-RapidAPI-Key": apiKey,
-                    "X-RapidAPI-Host": host,
-                },
-            });
-
-            const goalscorer = eventsResponse.data.response[0]; // get the first goalscorer
-
-            console.log(
-                `First goalscorer for Fixture ${fixtureID} against ${opponentTeam}:`
-            );
-            if (goalscorer) {
-                console.log(`Name: ${goalscorer.player.name}`);
-                console.log(`ID: ${goalscorer.player.id}`);
-            } else {
-                console.log("No goalscorer found for this fixture.");
-            }
-            console.log("\n");
-        }
+        const response = await axios.request(options);
+        const firstScorer = response.data.response[0];
+        return firstScorer ? firstScorer.player.name : "No goal scorer";
     } catch (error) {
-        console.error(error);
+        console.error('Error getting first scorer:', error);
     }
 }
 
-async function getLastMatch() {
-    try {
-
-        // get the current date, use new Date() to go back to normal
-        // currently, messing around with the date
-        const currentDate = new Date("2024-04-01");
-
-        const fixturesResponse = await axios.request({
-            method: "GET",
-            url: "https://api-football-v1.p.rapidapi.com/v3/fixtures",
-            params: {
-                season: "2024",
-                team: teamID,
-                from: "2024-02-23",
-                to: "2024-11-20",
-                timezone: "America/Los_Angeles",
-            },
-            headers: {
-                "X-RapidAPI-Key": apiKey,
-                "X-RapidAPI-Host": host,
-            },
-        });
-
-        let lastFixture = null;
-        for (const fixture of fixturesResponse.data.response) {
-            const fixtureDate = new Date(fixture.fixture.date);
-            if (fixtureDate < currentDate) {
-                lastFixture = fixture;
-            } else {
-                break;
-            }
-        }
-
-        if (lastFixture) {
-            return {
-                date: formatDateAndTime(lastFixture.fixture.date),
-                venueName: lastFixture.fixture.venue.name,
-                venueCity: lastFixture.fixture.venue.city,
-                fixtureId: lastFixture.fixture.id,
-                leagueName: lastFixture.league.name,
-                homeTeam: lastFixture.teams.home.name,
-                awayTeam: lastFixture.teams.away.name,
-                homeTeamGoals: lastFixture.goals.home,
-                awayTeamGoals: lastFixture.goals.away,
-            };
-        } else {
-            console.log("No previous fixtures found.");
-        }
-    } catch (error) {
-        console.error(error);
-    }
-}
 
 //some template for later getting player's photos 
 
@@ -242,7 +153,7 @@ async function getLastMatch() {
 //getFirstScorer();
 //getFixtures();
 
-module.exports = { getLastMatch, getFixtures };
+module.exports = { getFixtures, getFirstScorer };
 
 
 
