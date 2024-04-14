@@ -70,7 +70,7 @@ module.exports = {
                             `Away Team: ${fixture.away_team}\n` +
 							`Home Goals: ${fixture.home_goals}\n` +
 							`Away Goals: ${fixture.away_goals}\n` +
-							`First Scorer: ${fixture.first_scorer}\n` +
+							`First Scorer: ${fixture.first_scorer}\n` + //need to change this maybe?
                             `Date: ${formattedDate}\n` +
                             `Time: ${formattedTime}\n` +
                             `Venue: ${fixture.stadium}\n` +
