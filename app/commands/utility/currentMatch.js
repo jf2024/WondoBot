@@ -51,6 +51,14 @@ function formatTime(time) {
     return `${formattedHours}:${minutes} ${hours < 12 ? "AM" : "PM"}`;
 }
 
+function getThumbnailUrl(match) {
+    if (match.league === "Major League Soccer") {
+        return "https://cdn.discordapp.com/attachments/1228944144714436709/1228944263354777640/mls-logo.png?ex=662de289&is=661b6d89&hm=d4f33f8d0a029f4625aeb4b280f629219de2446623f0dfbef63951bbd3cd8322&";
+    } else if (match.league === "Leagues Cup") {
+        return "https://cdn.discordapp.com/attachments/1228944144714436709/1228956095926632458/Leagues_Cup_logo_white-on-black.png?ex=662ded8e&is=661b788e&hm=917e86804748a72a2fcf532ec9f8d9b337ad6f919c27606703df350da134e67c&";
+    } 
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("predict-current")
@@ -71,18 +79,19 @@ module.exports = {
             day: "numeric",
         });
         const time = formatTime(match.time);
+        const thumbnailUrl = getThumbnailUrl(match);
 
         const embed = new EmbedBuilder()
             .setTitle(`🗓️ Current Match`)
             .setDescription(
-                `**Match:** ${match.home_team} vs ${match.away_team}\n**Date:** ${date} ${time}\n**Venue:** ${match.stadium}\n**League:** ${match.league}`
+                `**Match:** ${match.home_team} vs ${match.away_team}\n**Date:** ${date}\n**Time:** ${time}\n**Venue:** ${match.stadium}\n**League:** ${match.league}`
             )
             //figure out a different way to get the logo\
             //currently just posting picture on server where bot is located and copying that link onto here
             .setThumbnail(
-                "https://cdn.discordapp.com/attachments/1228944144714436709/1228944263354777640/mls-logo.png?ex=662de289&is=661b6d89&hm=d4f33f8d0a029f4625aeb4b280f629219de2446623f0dfbef63951bbd3cd8322&"
+                thumbnailUrl
             ); 
-
         return interaction.reply({ embeds: [embed] });
     },
 };
+
