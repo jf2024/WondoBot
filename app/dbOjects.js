@@ -10,8 +10,8 @@ const User = require("./models/users.js")(sequelize, Sequelize.DataTypes);
 const Prediction = require("./models/prediction.js")(sequelize, Sequelize.DataTypes);
 const Match = require("./models/Match.js")(sequelize, Sequelize.DataTypes);
 
-User.hasMany(Prediction), { foreignKey: "user_id" };
-Prediction.belongsTo(User), { foreignKey: "user_id" };
+User.hasMany(Prediction, { foreignKey: "user_id" });
+Prediction.belongsTo(User, { foreignKey: "user_id" });
 Match.belongsTo(Prediction, { foreignKey: "id" });
 Prediction.hasOne(Match, { foreignKey: "id" });
 
