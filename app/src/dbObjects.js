@@ -43,7 +43,7 @@ Reflect.defineProperty(User.prototype, "createPrediction", {
   value: async (params) => {
     return Prediction.create({
       user_id: params.user_id,
-      match_id: 0, //TODO: add match id
+      match_id: params.match_id,
       user_home_pred: params.scoreOne,
       user_away_pred: params.scoreTwo,
       user_scorer: params.firstScorer,
