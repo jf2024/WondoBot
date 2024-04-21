@@ -178,39 +178,44 @@ module.exports = {
 // might change the grace period here but for now will do 
 
 async function findCurrentMatch() {
-    const currentDate = new Date();
+    try {
+        const currentDate = new Date(); // Current date and time
+        console.log("Current date:", currentDate.toLocaleDateString());
+        console.log("Current time:", currentDate.toLocaleTimeString());
 
-    // Get the current date and time
-    const currentTime = currentDate.getTime();
+        const gracePeriodMinutes = 135; // 2 hours and 15 minutes
+        const gracePeriodEnd = new Date(
+            currentDate.getTime() + gracePeriodMinutes * 60000
+        );
 
-    // Fetch the upcoming match
-    const currentMatch = await Match.findOne({
-        where: {
-            date: { [Op.gt]: currentDate },
-        },
-        order: [
-            ["date", "ASC"],
-            ["time", "ASC"],
-        ],
-        limit: 1,
-    });
+        const nextMatch = await Match.findOne({
+            where: {
+                [Op.or]: [
+                    {
+                        date: {
+                            [Op.gt]: currentDate,
+                        },
+                    },
+                    {
+                        date: currentDate.toLocaleDateString(),
+                        time: {
+                            [Op.gte]: currentDate.toLocaleTimeString(),
+                            [Op.lte]: gracePeriodEnd.toLocaleTimeString(),
+                        },
+                    },
+                ],
+            },
+            order: [
+                ["date", "ASC"],
+                ["time", "ASC"],
+            ],
+            limit: 1,
+        });
 
-    if (!currentMatch) {
-        return null; // No upcoming match found
+        console.log("Next match:", nextMatch);
+        return nextMatch;
+    } catch (error) {
+        console.error("Error finding upcoming match:", error);
+        return null;
     }
-
-    // Calculate the start time of the match
-    const matchStartTime = new Date(
-        `${currentMatch.date} ${currentMatch.time}`
-    ).getTime();
-
-    // Define a grace period (e.g., 15 minutes) after which predictions are not allowed
-    const gracePeriodMillis = 15 * 60 * 1000; // 15 minutes in milliseconds
-
-    // Check if the current time is within the grace period before the match starts
-    if (matchStartTime - currentTime <= gracePeriodMillis) {
-        return null; // Match has already started or within the grace period
-    }
-
-    return currentMatch; // Return the upcoming match
 }
