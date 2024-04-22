@@ -86,6 +86,60 @@ const seedPlayerData = async () => {
     }
 };
 
+const updateMatchTable = async () => {
+    try {
+        // Fetch new match data from the API
+        const matchObject = await fixturesObject();
+
+        if (
+            !matchObject ||
+            !matchObject.data ||
+            matchObject.data.length === 0
+        ) {
+            console.log("No new match data found.");
+            return;
+        }
+
+        // Iterate over the fetched matches
+        for (const match of matchObject.data) {
+            // Check if the match exists in the database
+            const existingMatch = await Match.findOne({
+                where: { fixture_id: match.fixture_id.toString() },
+            });
+
+            if (existingMatch) {
+                // ipdate match with new info like goals and finished status
+                await existingMatch.update({
+                    home_goals: match.home_goals,
+                    away_goals: match.away_goals,
+                    finished: match.finished,
+                });
+                console.log(`Match updated: ${match.fixture_id}`);
+            } else {
+                // Insert a new record for the new match
+                await Match.create({
+                    fixture_id: match.fixture_id,
+                    home_team: match.home_team,
+                    away_team: match.away_team,
+                    stadium: match.stadium,
+                    league: match.league,
+                    home_goals: match.home_goals,
+                    away_goals: match.away_goals,
+                    first_scorer: "No goal scorer",
+                    date: match.date,
+                    time: match.time,
+                    finished: match.finished,
+                });
+                console.log(`New match added: ${match.fixture_id}`);
+            }
+        }
+
+        console.log("Match table updated successfully.");
+    } catch (error) {
+        console.error("Error updating match table:", error);
+    }
+};
+
 sequelize
     .sync({ force })
     .then(async () => {
@@ -144,6 +198,7 @@ sequelize
                 firstScorer
             );
             await seedPlayerData();
+            await updateMatchTable();
         } catch (error) {
             console.error("Error seeding database:", error);
         } finally {
