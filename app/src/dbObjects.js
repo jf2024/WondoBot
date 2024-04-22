@@ -1,138 +1,78 @@
 const Sequelize = require("sequelize");
 
 const sequelize = new Sequelize("wondo_database", "user", "password", {
-  host: "localhost",
-  dialect: "postgres",
-  logging: false,
+    host: "localhost",
+    dialect: "postgres",
+    logging: false,
 });
 
 const User = require("./models/User.js")(sequelize, Sequelize.DataTypes);
+const Prediction = require("./models/Prediction.js")(sequelize, Sequelize.DataTypes);
 const Match = require("./models/Match.js")(sequelize, Sequelize.DataTypes);
-const CurrentMatch = require("./models/CurrentMatch.js")(
-  sequelize,
-  Sequelize.DataTypes
-);
-const Prediction = require("./models/Prediction.js")(
-  sequelize,
-  Sequelize.DataTypes 
-);
-
-const PredictCurrent = require("./models/PredictCurrent.js")(sequelize,
-  Sequelize.DataTypes
-);
-
-// users have many predicts ; predictions hold a match
-
-// a user table holds multipe predictions ; a match table holds multiple users predictions for one match
-
-// create prediction tabel when user makes prediction ; their user_id as a foreign key
+const Player = require("./models/Player.js")(sequelize, Sequelize.DataTypes);
 
 User.hasMany(Prediction, { foreignKey: "user_id" });
 Prediction.belongsTo(User, { foreignKey: "user_id" });
-
-// User.hasMany(PredictCurrent, { foreignKey: "user_id" });
-// PredictCurrent.belongsTo(User, { foreignKey: "user_id" });
-
 Match.belongsTo(Prediction, { foreignKey: "id" });
 Prediction.hasOne(Match, { foreignKey: "id" });
-// all predictions for one match point to one match identity in match table
 
-CurrentMatch.belongsTo(Match, { foreignKey: "id" });
+// Define the points system
+const POINTS_SYSTEM = {
+  correctResult: 1,
+  correctScore: 3,
+  correctScorer: 5,
+};
 
+// Update the createPrediction method in the User model
 Reflect.defineProperty(User.prototype, "createPrediction", {
   value: async (params) => {
-    return Prediction.create({
-      user_id: params.user_id,
-      match_id: params.match_id,
-      user_home_pred: params.scoreOne,
-      user_away_pred: params.scoreTwo,
-      user_scorer: params.firstScorer,
-      points_awarded: 0, //TODO: add point awarded
-    });
+      const prediction = {
+          user_id: params.user_id,
+          match_id: 0, // TODO: add match id
+          user_home_pred: params.scoreOne,
+          user_away_pred: params.scoreTwo,
+          user_scorer: params.firstScorer,
+      };
+
+      // Calculate points based on prediction and match details
+      const match = await Match.findByPk(prediction.match_id); // Fetch the match details
+      const points = calculatePoints(prediction.user_home_pred, prediction.user_away_pred, prediction.user_scorer, match);
+
+      // Save the prediction with awarded points
+      prediction.points_awarded = points;
+      return Prediction.create(prediction);
   },
 });
+
+// Define a function to calculate points based on predictions and match details
+function calculatePoints(homeScore, awayScore, firstScorer, match) {
+  let points = 0;
+
+  // Check if result is predicted correctly
+  if ((homeScore === match.home_goals && awayScore === match.away_goals) || (homeScore === match.away_goals && awayScore === match.home_goals)) {
+      points += POINTS_SYSTEM.correctResult;
+  }
+
+  // Check if score is predicted correctly
+  if (homeScore === match.home_goals && awayScore === match.away_goals) {
+      points += POINTS_SYSTEM.correctScore;
+  }
+
+  // Check if first scorer is predicted correctly
+  if (firstScorer === match.first_scorer) {
+      points += POINTS_SYSTEM.correctScorer;
+  }
+
+  return points;
+}
 
 Reflect.defineProperty(User.prototype, "getPredictions", {
-  value: (params) => {
-    return Prediction.findAll({
-      where: { user_id: params.user_id, match_id: 0 },
-      include: [""],
-    });
-  },
+    value: (params) => {
+        return Prediction.findAll({
+            where: { user_id: params.user_id, match_id: 0 },
+            include: [""],
+        });
+    },
 });
 
-// Reflect.defineProperty(User.prototype, "getTopTenPredictors", {
-//   value: () => {
-//     return User.findAll({
-//       order: [["total_points", "DESC"]],
-//       attributes: ["username"],
-//       limit: 10,
-//     });
-//   },
-// });
-
-// Reflect.defineProperty(Users.prototype, "getUser", {
-//   value: () => {
-//     const user = Users.findOne({
-//       where: { user_id: this.user_id },
-//     });
-//     if (!user) {
-//       return Users.createUser({
-//         user_id: this.user_id,
-//         username: this.username,
-//         total_points: 0,
-//         highest_pos: 0,
-//         lowest_pos: 0,
-//         ppg: 0,
-//         result: 0,
-//         scorer: 0,
-//         outcome: 0,
-//       });
-//     }
-
-//     return user;
-//   },
-// });
-
-// Reflect.defineProperty(Users.prototype, "createUser", {
-//   value: async () => {
-//     return Users.create({
-//       user_id: this.user_id,
-//       username: this.username,
-//       total_points: 0,
-//       highest_pos: 0,
-//       lowest_pos: 0,
-//       ppg: 0,
-//       result: 0,
-//       scorer: 0,
-//       outcome: 0,
-//     });
-//   },
-// });
-
-// Reflect.defineProperty(Matches.prototype, "addMatch", {
-//   value: async (match) => {
-//     // scoreOne, scoreTwo, firstScorer
-//     const matchItem = await Matches.findOne({
-//       where: { id: match.id },
-//     });
-
-//     // add conditional to check if game start time has passed
-//     if (matchItem) {
-//       return matchItem ?? "no prediction in existence aka null";
-//     }
-
-//     return Matches.create({
-//       id: match.id,
-//       home_team: "Barcelona",
-//       away_team: "Real Madrid",
-//       stadium: "Camp Nou",
-//       refe: "Mike Dean",
-//       home_goals: 2,
-//       away_goals: 3,
-//       first_scorer: "Messi",
-//     });
-//   },
-// });
-
-module.exports = { User, CurrentMatch, Match, Prediction, PredictCurrent };
+module.exports = { User, Match, Prediction, Player };

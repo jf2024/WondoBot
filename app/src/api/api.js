@@ -93,67 +93,34 @@ async function getFirstScorer(fixtureID) {
     }
 }
 
+//grabs players and their photos
+async function getPlayers() {
+    const options = {
+        method: "GET",
+        url: "https://api-football-v1.p.rapidapi.com/v3/players/squads",
+        params: { team: teamID },
+        headers: {
+            "X-RapidAPI-Key": apiKey,
+            "X-RapidAPI-Host": host,
+        },
+    };
 
-//some template for later getting player's photos 
+    try {
+        const response = await axios.request(options);
+        // console.log(response.data.response[0].players)
+        const players = response.data.response[0].players.map((player) => ({
+            name: player.name,
+            photoUrl: player.photo,
+        }));
+        return players;
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+}
 
-// const { Client, GatewayIntentBits, MessageEmbed, SlashCommandBuilder } = require('discord.js');
-// const axios = require('axios');
+getPlayers().then((players) => {
+    console.log(players);
+});
 
-// const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-
-// const getPlayerPhoto = async () => {
-//   const options = {
-//     method: 'GET',
-//     url: 'https://api-football-v1.p.rapidapi.com/v3/players/squads',
-//     params: { team: '1596' },
-//     headers: {
-//       'X-RapidAPI-Key': '5ec343875cmsh21a84d547184a43p1b6d5ajsn65156d649b0d',
-//       'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
-//     }
-//   };
-
-//   try {
-//     const response = await axios.request(options);
-//     const playerPhotos = response.data.response.map((player) => {
-//       const embed = new MessageEmbed()
-//         .setTitle(`${player.player.name}`)
-//         .setImage(player.player.photo);
-//       return embed;
-//     });
-//     return playerPhotos;
-//   } catch (error) {
-//     console.error(error);
-//     return ['An error occurred while fetching player photos.'];
-//   }
-// };
-
-// client.on('ready', () => {
-//   console.log(`Logged in as ${client.user.tag}!`);
-
-//   const getPlayerPhotoCommand = new SlashCommandBuilder()
-//     .setName('getplayerphoto')
-//     .setDescription('Get photos of players from a team');
-
-//   client.application.commands.set([getPlayerPhotoCommand]);
-// });
-
-// client.on('interactionCreate', async (interaction) => {
-//   if (!interaction.isCommand()) return;
-
-//   if (interaction.commandName === 'getplayerphoto') {
-//     const playerPhotos = await getPlayerPhoto();
-//     await interaction.reply({ embeds: playerPhotos });
-//   }
-// });
-
-// client.login('YOUR_BOT_TOKEN');
-
-
-//getCurrentMatch();
-//getFirstScorer();
-//getFixtures();
-
-module.exports = { getFixtures, getFirstScorer };
-
-
-
+module.exports = { getFixtures, getFirstScorer, getPlayers };

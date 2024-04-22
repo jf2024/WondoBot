@@ -88,9 +88,10 @@ module.exports = {
             )
             //figure out a different way to get the logo\
             //currently just posting picture on server where bot is located and copying that link onto here
-            .setThumbnail(
-                thumbnailUrl
-            ); 
+            .setThumbnail(thumbnailUrl)
+            .setFooter({
+                text: "Dates and times are in Pacific Time.",
+            });
         return interaction.reply({ embeds: [embed] });
     },
 };

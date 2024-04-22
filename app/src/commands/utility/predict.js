@@ -1,66 +1,239 @@
-const { SlashCommandBuilder, Collection } = require("discord.js");
-const db = require("../../dbObjects.js");
+/*
+currently works with full initial or just last name
+my concern is that if its just last name, would that
+hinder the check for the first scorer later on? 
+i dont think so since we can match it with the player name anyway but
+still something to consider
+*/
+
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { Prediction, User, Match, Player } = require("../../dbObjects.js");
+const { Op } = require("sequelize");
+
+    async function findCurrentMatch() {
+        try {
+            const currentDate = new Date(); 
+            console.log("Current date:", currentDate.toLocaleDateString());
+            console.log("Current time:", currentDate.toLocaleTimeString());
+
+            const gracePeriodMinutes = 135; // 2 hours and 15 minutes
+            const gracePeriodEnd = new Date(
+                currentDate.getTime() + gracePeriodMinutes * 60000
+            );
+
+            const nextMatch = await Match.findOne({
+                where: {
+                    [Op.or]: [
+                        {
+                            date: {
+                                [Op.gt]: currentDate,
+                            },
+                        },
+                        {
+                            date: currentDate.toLocaleDateString(),
+                            time: {
+                                [Op.gte]: currentDate.toLocaleTimeString(),
+                                [Op.lte]: gracePeriodEnd.toLocaleTimeString(),
+                            },
+                        },
+                    ],
+                },
+                order: [
+                    ["date", "ASC"],
+                    ["time", "ASC"],
+                ],
+                limit: 1,
+            });
+
+            console.log("Next match:", nextMatch);
+            return nextMatch;
+        } catch (error) {
+            console.error("Error finding upcoming match:", error);
+            return null;
+        }
+
+    }
 
 module.exports = {
-  data: new SlashCommandBuilder()
-    .setName("predict")
-    .setDescription("User makes a prediction.")
-    .addIntegerOption((option) =>
-      option
-        .setName("score_one")
-        .setDescription("Score of home team")
-        .setRequired(true)
-    )
-    .addIntegerOption((option) =>
-      option
-        .setName("score_two")
-        .setDescription("Score of away team")
-        .setRequired(true)
-    )
-    .addStringOption((option) =>
-      option
-        .setName("first_scorer")
-        .setDescription("First goal scorer from home team")
-        .setRequired(true)
-    ),
-  async execute(interaction) {
-    const scoreOne = interaction.options.getInteger("score_one");
-    const scoreTwo = interaction.options.getInteger("score_two");
-    const firstScorer = interaction.options.getString("first_scorer");
-    let user = await db.User.findOne({
-      where: { user_id: interaction.user.id },
-    });
+    data: new SlashCommandBuilder()
+        .setName("predict")
+        .setDescription("Make or update a prediction for the current match")
+        .addIntegerOption((option) =>
+            option
+                .setName("home-score")
+                .setDescription("Predicted home team score")
+                .setRequired(true)
+        )
+        .addIntegerOption((option) =>
+            option
+                .setName("away-score")
+                .setDescription("Predicted away team score")
+                .setRequired(true)
+        )
+        .addStringOption((option) =>
+            option
+                .setName("first-scorer")
+                .setDescription("Predicted first goalscorer")
+                .setRequired(true)
+        ),
+    async execute(interaction) {
+        try {
+            const homeScore = interaction.options.getInteger("home-score");
+            const awayScore = interaction.options.getInteger("away-score");
+            const firstScorerName =
+                interaction.options.getString("first-scorer");
 
-    if (user === null) {
-      user = await db.User.create({
-        user_id: interaction.user.id,
-        username: interaction.user.username,
-      });
-      console.log(user);
+            // find player in db
+            const player = await Player.findOne({
+                where: {
+                    [Op.or]: [
+                        { name: firstScorerName },
+                        {
+                            name: {
+                                [Op.like]: `%${firstScorerName
+                                    .split(" ")
+                                    .pop()}%`,
+                            },
+                        }, 
+                    ],
+                },
+            });
+
+            if (!player) {
+                const invalidScorerEmbed = new EmbedBuilder()
+                    .setColor("#FF0000")
+                    .setTitle("⚽ Invalid First Scorer")
+                    .setDescription(
+                        `${firstScorerName} is not a player on the San Jose Earthquakes team. Please try again with a valid player name.`
+                    );
+                return interaction.reply({ embeds: [invalidScorerEmbed] });
+            }
+
+            const currentMatch = await findCurrentMatch();
+            if (!currentMatch) {
+                const noMatchesEmbed = new EmbedBuilder()
+                    .setColor("#FF0000")
+                    .setTitle("🗓️ No Upcoming Matches")
+                    .setDescription(
+                        "There are no upcoming matches available to predict."
+                    );
+                return interaction.reply({ embeds: [noMatchesEmbed] });
+            }
+
+            const currentTime = new Date();
+            const matchStartTime = new Date(
+                `${currentMatch.date} ${currentMatch.time}`
+            );
+
+            if (currentTime >= matchStartTime) {
+                const matchStartedEmbed = new EmbedBuilder()
+                    .setColor("#FF0000")
+                    .setTitle("🗓️ Match Has Started")
+                    .setDescription(
+                        "The match has already started. You can no longer change your prediction."
+                    );
+                return interaction.reply({ embeds: [matchStartedEmbed] });
+            }
+
+            let user = await User.findOne({
+                where: { user_id: interaction.user.id },
+            });
+
+            if (!user) {
+                user = await User.create({
+                    user_id: interaction.user.id,
+                    username: interaction.user.username,
+                });
+            }
+
+            const existingPrediction = await Prediction.findOne({
+                where: {
+                    user_id: interaction.user.id,
+                    match_id: currentMatch.id,
+                },
+            });
+
+            // determine outcome based on scores from SJ perspective
+            let result;
+            if (homeScore === awayScore) {
+                result = "Draw";
+            } else if (homeScore > awayScore) {
+                result =
+                    currentMatch.homeTeam === "San Jose Earthquakes"
+                        ? "Win"
+                        : "Loss";
+            } else {
+                result =
+                    currentMatch.homeTeam === "San Jose Earthquakes"
+                        ? "Loss"
+                        : "Win";
+            }
+
+            let outcomeIndicator;
+            switch (result) {
+                case "Draw":
+                    outcomeIndicator = "🟠";
+                    break;
+                case "Win":
+                    outcomeIndicator = "🟢";
+                    break;
+                case "Loss":
+                    outcomeIndicator = "🔴";
+                    break;
+            }
+
+            if (existingPrediction) {
+                // update prediction
+                await existingPrediction.update({
+                    user_home_pred: homeScore,
+                    user_away_pred: awayScore,
+                    user_scorer: firstScorerName,
+                });
+
+                const updatedPredictionEmbed = new EmbedBuilder()
+                    .setColor("#0099ff")
+                    .setTitle("🏆⚽ Prediction Updated")
+                    .setDescription(
+                        `**User:** ${interaction.user}\n**Match:** ${currentMatch.home_team} ${homeScore}:${awayScore} ${currentMatch.away_team}\n**First Scorer:** ${firstScorerName}\n**Outcome:** ${result} ${outcomeIndicator}`
+                    )
+                    .setThumbnail(player.photoUrl)
+                    .setFooter({
+                        text: "You can change your prediction until the match starts.",
+                    });
+
+                return interaction.reply({ embeds: [updatedPredictionEmbed] });
+            } else {
+                // create new prediction
+                await Prediction.create({
+                    user_id: interaction.user.id,
+                    match_id: currentMatch.id,
+                    user_home_pred: homeScore,
+                    user_away_pred: awayScore,
+                    user_scorer: firstScorerName,
+                    points_awarded: 0,
+                });
+
+                const newPredictionEmbed = new EmbedBuilder()
+                    .setColor("#0099ff")
+                    .setTitle("🏆⚽ Prediction Updated")
+                    .setDescription(
+                        `**User:** ${interaction.user}\n**Match:** ${currentMatch.home_team} ${homeScore}:${awayScore} ${currentMatch.away_team}\n**First Scorer:** ${firstScorerName}\n**Outcome:** ${result} ${outcomeIndicator}`
+                    )
+                    .setThumbnail(player.photoUrl)
+                    .setFooter({
+                        text: "You can change your prediction until the match starts.",
+                    });
+                return interaction.reply({ embeds: [newPredictionEmbed] });
+            }
+        } catch (error) {
+            console.error("Error executing predict command:", error);
+            const errorEmbed = new EmbedBuilder()
+                .setColor("#FF0000")
+                .setTitle("🗓️ Error")
+                .setDescription(
+                    "An error occurred while processing your prediction."
+                );
+            await interaction.reply({ embeds: [errorEmbed] });
+        }
     }
-
-    const prediction = await db.Prediction.findOne({
-      where: { user_id: interaction.user.id, match_id: 0 },
-    });
-    // const prediction = await user.getPredictions({
-    //   user_id: interaction.user.id,
-    // });
-
-    // add conditional to check if game start time has passed
-    // update method
-    if (prediction !== null) {
-      return interaction.reply(
-        `You have already made a prediction for this match.`
-      );
-    }
-    const newPrediction = await user.createPrediction({
-      user_id: interaction.user.id,
-      scoreOne,
-      scoreTwo,
-      firstScorer,
-    });
-    return interaction.reply(
-      `prediction is :${newPrediction.user_id}, match_id: ${newPrediction.match_id}, scoreOne is :${newPrediction.user_home_pred}, scoreTwo is :${newPrediction.user_away_pred}, firstScorer is :${newPrediction.user_scorer}, and pointsAwarded is :${newPrediction.points_awarded}`
-    );
-  },
 };
