@@ -80,33 +80,40 @@ module.exports = {
         try {
             const homeScore = interaction.options.getInteger("home-score");
             const awayScore = interaction.options.getInteger("away-score");
-            const firstScorerName =
-                interaction.options.getString("first-scorer");
+            let firstScorerName = interaction.options.getString("first-scorer");
 
-            // find player in db
-            const player = await Player.findOne({
-                where: {
-                    [Op.or]: [
-                        { name: firstScorerName },
-                        {
-                            name: {
-                                [Op.like]: `%${firstScorerName
-                                    .split(" ")
-                                    .pop()}%`,
+            let player;
+
+            // if firstScorerName is "none"
+            if (firstScorerName.toLowerCase() === "none") {
+                firstScorerName = "none"; 
+            } else {
+                // find actual player here
+                player = await Player.findOne({
+                    where: {
+                        [Op.or]: [
+                            { name: firstScorerName },
+                            {
+                                name: {
+                                    [Op.like]: `%${firstScorerName
+                                        .split(" ")
+                                        .pop()}%`,
+                                },
                             },
-                        }, 
-                    ],
-                },
-            });
+                        ],
+                    },
+                });
 
-            if (!player) {
-                const invalidScorerEmbed = new EmbedBuilder()
-                    .setColor("#FF0000")
-                    .setTitle("⚽ Invalid First Scorer")
-                    .setDescription(
-                        `${firstScorerName} is not a player on the San Jose Earthquakes team. Please try again with a valid player name.`
-                    );
-                return interaction.reply({ embeds: [invalidScorerEmbed] });
+                //checks if player is valid or not
+                if (!player) {
+                    const invalidScorerEmbed = new EmbedBuilder()
+                        .setColor("#FF0000")
+                        .setTitle("⚽ Invalid First Scorer")
+                        .setDescription(
+                            `${firstScorerName} is not a player on the San Jose Earthquakes team. Please try again with a valid player name, or specify "none" if you believe no one will score first.`
+                        );
+                    return interaction.reply({ embeds: [invalidScorerEmbed] });
+                }
             }
 
             const currentMatch = await findCurrentMatch();
@@ -125,6 +132,7 @@ module.exports = {
                 `${currentMatch.date} ${currentMatch.time}`
             );
 
+            //embed for match started already
             if (currentTime >= matchStartTime) {
                 const matchStartedEmbed = new EmbedBuilder()
                     .setColor("#FF0000")
@@ -196,7 +204,7 @@ module.exports = {
                     .setDescription(
                         `**User:** ${interaction.user}\n**Match:** ${currentMatch.home_team} ${homeScore}:${awayScore} ${currentMatch.away_team}\n**First Scorer:** ${firstScorerName}\n**Outcome:** ${result} ${outcomeIndicator}`
                     )
-                    .setThumbnail(player.photoUrl)
+                    .setThumbnail(player ? player.photoUrl : interaction.user.displayAvatarURL())
                     .setFooter({
                         text: "You can change your prediction until the match starts.",
                     });
@@ -219,7 +227,7 @@ module.exports = {
                     .setDescription(
                         `**User:** ${interaction.user}\n**Match:** ${currentMatch.home_team} ${homeScore}:${awayScore} ${currentMatch.away_team}\n**First Scorer:** ${firstScorerName}\n**Outcome:** ${result} ${outcomeIndicator}`
                     )
-                    .setThumbnail(player.photoUrl)
+                    .setThumbnail(player ? player.photoUrl : interaction.user.displayAvatarURL())
                     .setFooter({
                         text: "You can change your prediction until the match starts.",
                     });
