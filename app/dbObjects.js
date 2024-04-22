@@ -9,6 +9,7 @@ const sequelize = new Sequelize("wondo_database", "user", "password", {
 const User = require("./models/users.js")(sequelize, Sequelize.DataTypes);
 const Prediction = require("./models/prediction.js")(sequelize, Sequelize.DataTypes);
 const Match = require("./models/Match.js")(sequelize, Sequelize.DataTypes);
+const Player = require("./models/Player.js")(sequelize, Sequelize.DataTypes);
 
 User.hasMany(Prediction, { foreignKey: "user_id" });
 Prediction.belongsTo(User, { foreignKey: "user_id" });
@@ -37,4 +38,4 @@ Reflect.defineProperty(User.prototype, "getPredictions", {
     },
 });
 
-module.exports = { User, Match, Prediction };
+module.exports = { User, Match, Prediction, Player };

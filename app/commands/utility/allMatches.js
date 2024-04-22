@@ -9,7 +9,7 @@ the perspective of the San Jose Earthquakes
 */
 
 const { SlashCommandBuilder } = require("discord.js");
-const { Match } = require("../../dbOjects.js");
+const { Match } = require("../../dbObjects.js");
 
 function formatTime(time) {
     const [hours, minutes] = time.split(":");

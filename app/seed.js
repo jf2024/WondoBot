@@ -3,7 +3,8 @@ needing to run the seed file every time we want to update the database.c
 */
 const Sequelize = require("sequelize");
 const { Op } = require("sequelize");
-const { getFixtures, getFirstScorer } = require("./api-functions/api.js");
+const { getFixtures, getFirstScorer, getPlayers } = require("./api-functions/api.js");
+const teamID = "1596"; 
 
 const sequelize = new Sequelize("wondo_database", "user", "password", {
     host: "localhost",
@@ -26,6 +27,7 @@ const Prediction = require("./models/prediction.js")(
     Sequelize.DataTypes
 );
 const Match = require("./models/Match.js")(sequelize, Sequelize.DataTypes);
+const Player = require("./models/Player.js")(sequelize, Sequelize.DataTypes);
 
 const force = process.argv.includes("--force") || process.argv.includes("-f");
 
@@ -57,6 +59,30 @@ const findPreviousMatch = async () => {
     } catch (error) {
         console.error("Error finding previous match:", error);
         return null;
+    }
+};
+
+const seedPlayerData = async () => {
+    try {
+        const players = await getPlayers();
+
+        // Check if the players table is empty
+        const existingPlayers = await Player.findAll();
+        if (existingPlayers.length === 0) {
+            // Store the players in the database
+            await Player.bulkCreate(
+                players.map((player) => ({
+                    name: player.name,
+                    photoUrl: player.photoUrl,
+                    teamId: teamID, 
+                }))
+            );
+            console.log("Player data seeded successfully.");
+        } else {
+            console.log("Player data already exists in the database.");
+        }
+    } catch (error) {
+        console.error("Error seeding player data:", error);
     }
 };
 
@@ -117,6 +143,7 @@ sequelize
                 "First scorer updated for the previous match:",
                 firstScorer
             );
+            await seedPlayerData();
         } catch (error) {
             console.error("Error seeding database:", error);
         } finally {

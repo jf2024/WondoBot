@@ -1,19 +1,58 @@
 /*
-- Necessary thing for this file
-a) When a user types in a scorer, need to check if the player is indeed part 
-of the SJ earthquakes. If it's not a valid name, tell user to try again.
-b) check grace period as described in the function near the bottom of the file
-
-Optional part for this file
-a) currently, picture when user makes a prediction is just the user's profile picture,
-maybe in the future, we can have a picture of the player that the user predicts to score first
-some code for this or a template is in the api.js file 
+currently works with full initial or just last name
+my concern is that if its just last name, would that
+hinder the check for the first scorer later on? 
+i dont think so since we can match it with the player name anyway but
+still something to consider
 */
 
-
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const { Prediction, User, Match } = require("../../dbOjects.js");
+const { Prediction, User, Match, Player } = require("../../dbObjects.js");
 const { Op } = require("sequelize");
+
+    async function findCurrentMatch() {
+        try {
+            const currentDate = new Date(); 
+            console.log("Current date:", currentDate.toLocaleDateString());
+            console.log("Current time:", currentDate.toLocaleTimeString());
+
+            const gracePeriodMinutes = 135; // 2 hours and 15 minutes
+            const gracePeriodEnd = new Date(
+                currentDate.getTime() + gracePeriodMinutes * 60000
+            );
+
+            const nextMatch = await Match.findOne({
+                where: {
+                    [Op.or]: [
+                        {
+                            date: {
+                                [Op.gt]: currentDate,
+                            },
+                        },
+                        {
+                            date: currentDate.toLocaleDateString(),
+                            time: {
+                                [Op.gte]: currentDate.toLocaleTimeString(),
+                                [Op.lte]: gracePeriodEnd.toLocaleTimeString(),
+                            },
+                        },
+                    ],
+                },
+                order: [
+                    ["date", "ASC"],
+                    ["time", "ASC"],
+                ],
+                limit: 1,
+            });
+
+            console.log("Next match:", nextMatch);
+            return nextMatch;
+        } catch (error) {
+            console.error("Error finding upcoming match:", error);
+            return null;
+        }
+
+    }
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -41,7 +80,34 @@ module.exports = {
         try {
             const homeScore = interaction.options.getInteger("home-score");
             const awayScore = interaction.options.getInteger("away-score");
-            const firstScorer = interaction.options.getString("first-scorer");
+            const firstScorerName =
+                interaction.options.getString("first-scorer");
+
+            // find player in db
+            const player = await Player.findOne({
+                where: {
+                    [Op.or]: [
+                        { name: firstScorerName },
+                        {
+                            name: {
+                                [Op.like]: `%${firstScorerName
+                                    .split(" ")
+                                    .pop()}%`,
+                            },
+                        }, 
+                    ],
+                },
+            });
+
+            if (!player) {
+                const invalidScorerEmbed = new EmbedBuilder()
+                    .setColor("#FF0000")
+                    .setTitle("⚽ Invalid First Scorer")
+                    .setDescription(
+                        `${firstScorerName} is not a player on the San Jose Earthquakes team. Please try again with a valid player name.`
+                    );
+                return interaction.reply({ embeds: [invalidScorerEmbed] });
+            }
 
             const currentMatch = await findCurrentMatch();
             if (!currentMatch) {
@@ -87,7 +153,7 @@ module.exports = {
                 },
             });
 
-            // determine outcome based on scores from sj perspective
+            // determine outcome based on scores from SJ perspective
             let result;
             if (homeScore === awayScore) {
                 result = "Draw";
@@ -121,31 +187,29 @@ module.exports = {
                 await existingPrediction.update({
                     user_home_pred: homeScore,
                     user_away_pred: awayScore,
-                    user_scorer: firstScorer,
+                    user_scorer: firstScorerName,
                 });
 
                 const updatedPredictionEmbed = new EmbedBuilder()
                     .setColor("#0099ff")
                     .setTitle("🏆⚽ Prediction Updated")
                     .setDescription(
-                        `**User:** ${interaction.user}\n**Match:** ${currentMatch.home_team} ${homeScore}:${awayScore} ${currentMatch.away_team}\n**First Scorer:** ${firstScorer}\n**Outcome:** ${result} ${outcomeIndicator}`
+                        `**User:** ${interaction.user}\n**Match:** ${currentMatch.home_team} ${homeScore}:${awayScore} ${currentMatch.away_team}\n**First Scorer:** ${firstScorerName}\n**Outcome:** ${result} ${outcomeIndicator}`
                     )
-                    .setThumbnail(interaction.user.displayAvatarURL())
+                    .setThumbnail(player.photoUrl)
                     .setFooter({
                         text: "You can change your prediction until the match starts.",
                     });
 
-
                 return interaction.reply({ embeds: [updatedPredictionEmbed] });
-                
             } else {
-                // create new prediction 
+                // create new prediction
                 await Prediction.create({
                     user_id: interaction.user.id,
                     match_id: currentMatch.id,
                     user_home_pred: homeScore,
                     user_away_pred: awayScore,
-                    user_scorer: firstScorer,
+                    user_scorer: firstScorerName,
                     points_awarded: 0,
                 });
 
@@ -153,9 +217,9 @@ module.exports = {
                     .setColor("#0099ff")
                     .setTitle("🏆⚽ Prediction Updated")
                     .setDescription(
-                        `**User:** ${interaction.user}\n**Match:** ${currentMatch.home_team} ${homeScore}:${awayScore} ${currentMatch.away_team}\n**First Scorer:** ${firstScorer}\n**Outcome:** ${result} ${outcomeIndicator}`
+                        `**User:** ${interaction.user}\n**Match:** ${currentMatch.home_team} ${homeScore}:${awayScore} ${currentMatch.away_team}\n**First Scorer:** ${firstScorerName}\n**Outcome:** ${result} ${outcomeIndicator}`
                     )
-                    .setThumbnail(interaction.user.displayAvatarURL())
+                    .setThumbnail(player.photoUrl)
                     .setFooter({
                         text: "You can change your prediction until the match starts.",
                     });
@@ -171,51 +235,5 @@ module.exports = {
                 );
             await interaction.reply({ embeds: [errorEmbed] });
         }
-    },
-};
-
-
-// might change the grace period here but for now will do 
-
-async function findCurrentMatch() {
-    try {
-        const currentDate = new Date(); // Current date and time
-        console.log("Current date:", currentDate.toLocaleDateString());
-        console.log("Current time:", currentDate.toLocaleTimeString());
-
-        const gracePeriodMinutes = 135; // 2 hours and 15 minutes
-        const gracePeriodEnd = new Date(
-            currentDate.getTime() + gracePeriodMinutes * 60000
-        );
-
-        const nextMatch = await Match.findOne({
-            where: {
-                [Op.or]: [
-                    {
-                        date: {
-                            [Op.gt]: currentDate,
-                        },
-                    },
-                    {
-                        date: currentDate.toLocaleDateString(),
-                        time: {
-                            [Op.gte]: currentDate.toLocaleTimeString(),
-                            [Op.lte]: gracePeriodEnd.toLocaleTimeString(),
-                        },
-                    },
-                ],
-            },
-            order: [
-                ["date", "ASC"],
-                ["time", "ASC"],
-            ],
-            limit: 1,
-        });
-
-        console.log("Next match:", nextMatch);
-        return nextMatch;
-    } catch (error) {
-        console.error("Error finding upcoming match:", error);
-        return null;
     }
-}
+};

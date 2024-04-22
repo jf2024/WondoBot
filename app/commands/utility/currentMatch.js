@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const { Match } = require("../../dbOjects.js");
+const { Match } = require("../../dbObjects.js");
 const { Op } = require("sequelize");
 
 async function findMatch() {
