@@ -13,10 +13,10 @@ module.exports = (sequelize, DataTypes) => {
             username: {
                 type: DataTypes.STRING,
             },
-            // appearances: {
-            //     type: DataTypes.INTEGER,
-            //     defaultValue: 0,
-            // },
+            appearances: {
+                type: DataTypes.INTEGER,
+                defaultValue: 0,
+            },
             points: {
                 type: DataTypes.INTEGER,
                 defaultValue: 0,
@@ -29,10 +29,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.INTEGER,
                 defaultValue: 0,
             },
-            // current_pos: {
-            //     type: DataTypes.INTEGER,
-            //     defaultValue: 0,
-            // },
+            current_pos: {
+                type: DataTypes.INTEGER,
+                defaultValue: 0,
+            },
             ppg: {
                 type: DataTypes.FLOAT,
                 defaultValue: 0,

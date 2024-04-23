@@ -2,6 +2,9 @@
 started work predict last command
 not sure if it does update 
 points for user, need to test somehow
+
+optional thing here: set thumbnail depending on outcome of game
+draw is neutral, loss is depressed, win is happy
 */
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const { Prediction, User, Match } = require("../../dbObjects");
@@ -57,7 +60,8 @@ module.exports = {
                         attributes: [
                             "username",
                             "points",
-                            //"appearances",
+                            "appearances",
+                            "current_pos",
                             "highest_pos",
                             "lowest_pos",
                             "ppg",
@@ -175,29 +179,42 @@ async function evaluatePrediction(matchId) {
             const user = prediction.user;
             let points = 0;
 
-            // checking all here
+            // Check if the score prediction is correct
             const isScoreCorrect =
                 prediction.user_home_pred === match.home_goals &&
                 prediction.user_away_pred === match.away_goals;
 
-            
+            // Check if the first scorer prediction is correct
             const isFirstScorerCorrect =
                 prediction.user_scorer.toLowerCase() ===
                 match.first_scorer.toLowerCase();
 
-            // points here, need to change this!!!!!!!!!!!!!!!!
-            if (isScoreCorrect && isFirstScorerCorrect) {
-                points = 5; // Correct score and first scorer
-            } else if (isScoreCorrect) {
-                points = 3; // Correct score only
-            } else if (isFirstScorerCorrect) {
-                points = 2; // Correct first scorer only
+            // Check if the outcome prediction is correct
+            const isOutcomeCorrect =
+                (prediction.user_home_pred === prediction.user_away_pred &&
+                    match.home_goals === match.away_goals) ||
+                (prediction.user_home_pred > prediction.user_away_pred &&
+                    match.home_goals > match.away_goals) ||
+                (prediction.user_home_pred < prediction.user_away_pred &&
+                    match.home_goals < match.away_goals);
+
+            //point system here, change values 
+            if (isScoreCorrect) {
+                points += 5;
             }
 
-            // update user here
+            if (isFirstScorerCorrect) {
+                points += 3;
+            }
+
+            if (isOutcomeCorrect) {
+                points += 1;
+            }
+
+            // Update user points and other relevant fields
             await user.update({
                 points: user.points + points,
-                //appearances: user.appearances + 1,
+                appearances: user.appearances + 1,
                 highest_pos: Math.max(user.highest_pos, 1), //replace 1 with current_pos
                 lowest_pos: Math.min(user.lowest_pos, 1), //replace 1 with current_pos
                 ppg: user.points / 1, //replace 1 with appearances
@@ -205,10 +222,7 @@ async function evaluatePrediction(matchId) {
                 first_scorer: isFirstScorerCorrect
                     ? user.first_scorer + 1
                     : user.first_scorer, // Increment first_scorer if correct
-                outcome:
-                    isScoreCorrect && isFirstScorerCorrect
-                        ? user.outcome + 1
-                        : user.outcome, // Increment outcome if both correct
+                outcome: isOutcomeCorrect ? user.outcome + 1 : user.outcome, // Increment outcome if correct
             });
 
             // Update the prediction's points_awarded field
