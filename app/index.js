@@ -1,15 +1,11 @@
+const INTERVAL = false;
+
 const fs = require("node:fs");
 const path = require("node:path");
 const { Client, Collection, Events, GatewayIntentBits } = require("discord.js");
 const { token } = require("../config.json");
 
-// const seed = require("./seedInitial.js");
-const seed = require("./seed.js");
-const {
-  //   getFixtures,
-  getFirstScorer,
-  //   getPlayers,
-} = require("./api-functions/api.js");
+const { getFirstScorer } = require("./api-functions/api.js");
 
 const Sequelize = require("sequelize");
 const force = process.argv.includes("--force") || process.argv.includes("-f");
@@ -35,73 +31,75 @@ const Player = require("./models/Player.js")(sequelize, Sequelize.DataTypes);
 //
 
 // Calls API every 6 hours to reseed tables in db with data from api
-setInterval(function () {
-  sequelize
-    .sync({ force })
-    .then(async () => {
-      try {
-        // Seed matches
-        const matchObject = await seed.getFixturesObject();
+// if (INTERVAL) {
+//   setInterval(function () {
+//     sequelize
+//       .sync({ force })
+//       .then(async () => {
+//         try {
+//           // Seed matches
+//           const matchObject = await seed.getFixturesObject();
 
-        if (
-          !matchObject ||
-          !matchObject.data ||
-          matchObject.data.length === 0
-        ) {
-          console.log(
-            "No data to seed was found. Check api call for data availability."
-          );
-          return;
-        }
+//           if (
+//             !matchObject ||
+//             !matchObject.data ||
+//             matchObject.data.length === 0
+//           ) {
+//             console.log(
+//               "No data to seed was found. Check api call for data availability."
+//             );
+//             return;
+//           }
 
-        await Promise.all(
-          matchObject.data.map(async (match) => {
-            await Match.create({
-              fixture_id: match.fixture_id,
-              home_team: match.home_team,
-              away_team: match.away_team,
-              stadium: match.stadium,
-              league: match.league,
-              home_goals: match.home_goals,
-              away_goals: match.away_goals,
-              first_scorer: "No goal scorer", // Placeholder for now
-              date: match.date,
-              time: match.time,
-              finished: match.finished,
-            });
-          })
-        );
+//           await Promise.all(
+//             matchObject.data.map(async (match) => {
+//               await Match.create({
+//                 fixture_id: match.fixture_id,
+//                 home_team: match.home_team,
+//                 away_team: match.away_team,
+//                 stadium: match.stadium,
+//                 league: match.league,
+//                 home_goals: match.home_goals,
+//                 away_goals: match.away_goals,
+//                 first_scorer: "No goal scorer", // Placeholder for now
+//                 date: match.date,
+//                 time: match.time,
+//                 finished: match.finished,
+//               });
+//             })
+//           );
 
-        console.log("Matches reseeded successfully.");
+//           console.log("Matches reseeded successfully.");
 
-        // Update first scorer for previous match
-        const previousMatch = await seed.getFindPreviousMatch();
+//           // Update first scorer for previous match
+//           const previousMatch = await seed.getFindPreviousMatch();
 
-        if (!previousMatch) {
-          console.log("No previous match found.");
-          return;
-        }
+//           if (!previousMatch) {
+//             console.log("No previous match found.");
+//             return;
+//           }
 
-        const firstScorer = await getFirstScorer(previousMatch.fixture_id);
+//           const firstScorer = await getFirstScorer(previousMatch.fixture_id);
 
-        await Match.update(
-          { first_scorer: firstScorer || "No goal scorer" },
-          { where: { fixture_id: previousMatch.fixture_id } }
-        );
+//           await Match.update(
+//             { first_scorer: firstScorer || "No goal scorer" },
+//             { where: { fixture_id: previousMatch.fixture_id } }
+//           );
 
-        console.log(
-          "First scorer reupdated for the previous match:",
-          firstScorer
-        );
-        await seed.updatePlayerData();
-        await seed.getUpdateMatchTable();
-      } catch (error) {
-        console.error("Error reseeding database:", error);
-      }
-    })
-    .catch(console.error);
-}, 10000);
-//21600000ms = 6 hours
+//           console.log(
+//             "First scorer reupdated for the previous match:",
+//             firstScorer
+//           );
+//           await seed.updatePlayerData();
+//           await seed.getUpdateMatchTable();
+//         } catch (error) {
+//           console.error("Error reseeding database:", error);
+//         }
+//       })
+//       .catch(console.error);
+//   }, 10000);
+//   //21600000ms = 6 hours
+// }
 
 client.commands = new Collection();
 const foldersPath = path.join(__dirname, "commands");
