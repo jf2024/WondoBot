@@ -35,15 +35,13 @@ const Player = require("./models/Player.js")(sequelize, Sequelize.DataTypes);
 
 const force = process.argv.includes("--force") || process.argv.includes("-f");
 
-// const fixturesObject = getfixturesObject();
-async function getFixturesObject() {
+const fixturesObject = async () => {
   const fixtures = await getFixtures();
   return fixtures;
-}
+};
 
 // Find the previous match to get first scorer
-// const findPreviousMatch = getfindPreviousMatch();
-async function getFindPreviousMatch() {
+const findPreviousMatch = async () => {
   try {
     const currentDate = new Date(); // Current date and time
 
@@ -66,10 +64,9 @@ async function getFindPreviousMatch() {
     console.error("Error finding previous match:", error);
     return null;
   }
-}
+};
 
-// const seedPlayerData = createSeedPlayerData();
-async function createSeedPlayerData() {
+const seedPlayerData = async () => {
   try {
     const players = await getPlayers();
 
@@ -91,30 +88,12 @@ async function createSeedPlayerData() {
   } catch (error) {
     console.error("Error seeding player data:", error);
   }
-}
+};
 
-async function updatePlayerData() {
-  try {
-    const players = await getPlayers();
-
-    // Update the players in the database
-    await Player.bulkCreate(players, {
-      updateOnDuplicate: ["id", "name", "photoUrl"],
-    }).then(
-      console.log(
-        "Player Table updated successfully. Updates made where necessary."
-      )
-    );
-  } catch (error) {
-    console.error("Error reseeding(update) player data:", error);
-  }
-}
-
-// const updateMatchTable = getUpdateMatchTable();
-async function getUpdateMatchTable() {
+const updateMatchTable = async () => {
   try {
     // Fetch new match data from the API
-    const matchObject = await getFixturesObject();
+    const matchObject = await fixturesObject();
 
     if (!matchObject || !matchObject.data || matchObject.data.length === 0) {
       console.log("No new match data found.");
@@ -129,7 +108,7 @@ async function getUpdateMatchTable() {
       });
 
       if (existingMatch) {
-        // update match with new info like goals and finished status
+        // ipdate match with new info like goals and finished status
         await existingMatch.update({
           home_goals: match.home_goals,
           away_goals: match.away_goals,
@@ -159,12 +138,64 @@ async function getUpdateMatchTable() {
   } catch (error) {
     console.error("Error updating match table:", error);
   }
-}
+};
 
-// module.exports = { testDbConnection, seedDb };
+sequelize
+  .sync({ force })
+  .then(async () => {
+    try {
+      // Seed matches
+      const matchObject = await fixturesObject();
 
-// exports.seedDb = seedDb;
-exports.getFixturesObject = getFixturesObject;
-exports.getFindPreviousMatch = getFindPreviousMatch;
-exports.updatePlayerData = updatePlayerData;
-exports.getUpdateMatchTable = getUpdateMatchTable;
+      if (!matchObject || !matchObject.data || matchObject.data.length === 0) {
+        console.log(
+          "No data to seed was found. Check api call for data availability."
+        );
+        return;
+      }
+
+      await Promise.all(
+        matchObject.data.map(async (match) => {
+          await Match.create({
+            fixture_id: match.fixture_id,
+            home_team: match.home_team,
+            away_team: match.away_team,
+            stadium: match.stadium,
+            league: match.league,
+            home_goals: match.home_goals,
+            away_goals: match.away_goals,
+            first_scorer: "No goal scorer", // Placeholder for now
+            date: match.date,
+            time: match.time,
+            finished: match.finished,
+          });
+        })
+      );
+
+      console.log("Matches seeded successfully.");
+
+      // Update first scorer for previous match
+      const previousMatch = await findPreviousMatch();
+
+      if (!previousMatch) {
+        console.log("No previous match found.");
+        return;
+      }
+
+      const firstScorer = await getFirstScorer(previousMatch.fixture_id);
+
+      await Match.update(
+        { first_scorer: firstScorer || "No goal scorer" },
+        { where: { fixture_id: previousMatch.fixture_id } }
+      );
+
+      console.log("First scorer updated for the previous match:", firstScorer);
+      await seedPlayerData();
+      await updateMatchTable();
+    } catch (error) {
+      console.error("Error seeding database:", error);
+    } finally {
+      sequelize.close();
+    }
+  })
+  .catch(console.error);
