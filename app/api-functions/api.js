@@ -1,20 +1,8 @@
 const axios = require("axios");
-const { apiKey } = require("../../config.json");
+const { apiKey } = require("../config.json");
 const teamID = "1596";
 const host = "api-football-v1.p.rapidapi.com";
 
-//function to separate date and time and dropping the seconds
-function formatDateAndTime(dateString) {
-  const date = new Date(dateString);
-  const formattedDate = date.toLocaleDateString();
-  const formattedTime = date.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
-
-  return `${formattedDate}, ${formattedTime}`;
-}
 // grabs all the fixtures/schedule for the SJ team
 async function getFixtures() {
   const options = {
@@ -117,9 +105,5 @@ async function getPlayers() {
     return [];
   }
 }
-
-getPlayers().then((players) => {
-  console.log(players);
-});
 
 module.exports = { getFixtures, getFirstScorer, getPlayers };
