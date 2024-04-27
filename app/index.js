@@ -3,7 +3,7 @@ const INTERVAL = true;
 const fs = require("node:fs");
 const path = require("node:path");
 const { Client, Collection, Events, GatewayIntentBits } = require("discord.js");
-const { token } = require("../config.json");
+const { token } = require("./config.json");
 const seed = require("./seed.js");
 const { getFirstScorer } = require("./api-functions/api.js");
 
@@ -11,6 +11,8 @@ const Sequelize = require("sequelize");
 const force = process.argv.includes("--force") || process.argv.includes("-f");
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+//test
 
 const sequelize = new Sequelize("wondo_database", "user", "password", {
   host: "localhost",
@@ -26,71 +28,76 @@ const Prediction = require("./models/prediction.js")(
 const Match = require("./models/Match.js")(sequelize, Sequelize.DataTypes);
 const Player = require("./models/Player.js")(sequelize, Sequelize.DataTypes);
 
-// Add a method to retrieve all fixture IDs from the database
-async function getAllFixtureIds() {
-  const matches = await Match.findAll({ attributes: ['fixture_id'] });
-  return matches.map(match => match.fixture_id);
-}
+//Calls API every 6 hours to reseed tables in db with data from api
+//if (INTERVAL) {
+  //setInterval(function () {
+    sequelize
+      .sync({ force })
+      .then(async () => {
+        try {
+          // Seed matches
+          const matchObject = await seed.getFixturesObject();
 
-// Calls API every 6 hours to reseed tables in db with data from api
-if (INTERVAL) {
-  setInterval(async function () {
-    try {
-      const existingFixtureIds = await getAllFixtureIds();
-  
-      // Seed matches
-      const matchObject = await seed.getFixturesObject();
-  
-      if (!matchObject || !matchObject.data || matchObject.data.length === 0) {
-        console.log("No data to seed was found. Check api call for data availability.");
-        return;
-      }
-  
-      await Promise.all(matchObject.data.map(async (match) => {
-        if (!existingFixtureIds.includes(match.fixture_id)) {
-          // Insert only if the match is not already in the database
-          await Match.create({
-            fixture_id: match.fixture_id,
-            home_team: match.home_team,
-            away_team: match.away_team,
-            stadium: match.stadium,
-            league: match.league,
-            home_goals: match.home_goals,
-            away_goals: match.away_goals,
-            first_scorer: "No goal scorer", // Placeholder for now
-            date: match.date,
-            time: match.time,
-            finished: match.finished,
-          });
+          if (
+            !matchObject ||
+            !matchObject.data ||
+            matchObject.data.length === 0
+          ) {
+            console.log(
+              "No data to seed was found. Check api call for data availability."
+            );
+            return;
+          }
+
+          await Promise.all(
+            matchObject.data.map(async (match) => {
+              await Match.create({
+                fixture_id: match.fixture_id,
+                home_team: match.home_team,
+                away_team: match.away_team,
+                stadium: match.stadium,
+                league: match.league,
+                home_goals: match.home_goals,
+                away_goals: match.away_goals,
+                first_scorer: "No goal scorer", // Placeholder for now
+                date: match.date,
+                time: match.time,
+                finished: match.finished,
+              });
+            })
+          );
+
+          console.log("Matches reseeded successfully.");
+
+          // Update first scorer for previous match
+          const previousMatch = await seed.getFindPreviousMatch();
+
+          if (!previousMatch) {
+            console.log("No previous match found.");
+            return;
+          }
+
+          const firstScorer = await getFirstScorer(previousMatch.fixture_id);
+
+          await Match.update(
+            { first_scorer: firstScorer || "No goal scorer" },
+            { where: { fixture_id: previousMatch.fixture_id } }
+          );
+
+          console.log(
+            "First scorer reupdated for the previous match:",
+            firstScorer
+          );
+          await seed.updatePlayerData();
+          await seed.getUpdateMatchTable();
+        } catch (error) {
+          console.error("Error reseeding database:", error);
         }
-      }));
-
-      console.log("Matches reseeded successfully.");
-
-      // Update first scorer for previous match
-      const previousMatch = await seed.getFindPreviousMatch();
-
-      if (!previousMatch) {
-        console.log("No previous match found.");
-        return;
-      }
-
-      const firstScorer = await getFirstScorer(previousMatch.fixture_id);
-
-      await Match.update(
-        { first_scorer: firstScorer || "No goal scorer" },
-        { where: { fixture_id: previousMatch.fixture_id } }
-      );
-
-      console.log("First scorer reupdated for the previous match:", firstScorer);
-      await seed.updatePlayerData();
-      await seed.getUpdateMatchTable();
-    } catch (error) {
-      console.error("Error reseeding database:", error);
-    }
-  }, 21600000); // 6 hours interval
-}
-
+      })
+      .catch(console.error);
+  //}, );
+  //21600000ms = 6 hours
+//}
 
 client.commands = new Collection();
 const foldersPath = path.join(__dirname, "commands");
