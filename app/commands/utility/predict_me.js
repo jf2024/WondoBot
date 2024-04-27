@@ -34,9 +34,10 @@ module.exports = {
                     .setColor("#0099ff")
                     .setTitle("📊 Prediction Statistics")
                     .setDescription(
-                        `User: ${interaction.user.toString()}\n\n` + 
+                        `User: ${interaction.user.toString()}\n\n` +
+                            "**Rankings**\n" +
                             `🟠 Current: ${user.current_pos}\n` +
-                            `🟠 Previous: ${previousPos}\n` + 
+                            `🟠 Previous: ${previousPos}\n` +
                             `🟠 Highest: ${user.highest_pos}\n` +
                             `🟠 Lowest: ${user.lowest_pos}\n\n` +
                             "**Stats**\n" +
