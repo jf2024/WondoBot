@@ -42,7 +42,7 @@ async function getFixtures() {
         league: fixture.league.name,
         home_goals: fixture.goals.home,
         away_goals: fixture.goals.away,
-        first_scorer: "No goal scorer", //getFirstScorer(fixture.fixture.id)
+        first_scorer: "none",
         date: date,
         time: time,
         finished: fixture.fixture.status.short === "FT",
@@ -74,7 +74,7 @@ async function getFirstScorer(fixtureID) {
   try {
     const response = await axios.request(options);
     const firstScorer = response.data.response[0];
-    return firstScorer ? firstScorer.player.name : "No goal scorer";
+    return firstScorer ? firstScorer.player.name : "None";
   } catch (error) {
     console.error("Error getting first scorer:", error);
   }
