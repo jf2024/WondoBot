@@ -3,7 +3,7 @@ const db = require("../../dbObjects");
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName("predict_top")
+        .setName("predict-top")
         .setDescription("Users with top 10 highest prediction scores."),
     async execute(interaction) {
         try {
