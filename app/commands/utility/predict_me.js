@@ -55,19 +55,19 @@ module.exports = {
 
                 await interaction.reply({ embeds: [embed] });
             } else {
-                //change the way i do this here but it works for now
-                const previousPos =
-                    user.current_pos > 1 ? user.current_pos - 1 : 1;
+                // Update previous_pos based on current_pos
+                const previousPos = user.current_pos;
+                await user.update({ previous_pos: previousPos });
 
                 // Create the embed for users who have made predictions
                 const embed = new EmbedBuilder()
                     .setColor("#0099ff")
                     .setTitle("📊 Prediction Statistics")
                     .setDescription(
-                        `User: ${interaction.user.toString()}\n\n` + 
+                        `User: ${interaction.user.toString()}\n\n` +
                             "**Rankings**\n" +
                             `🟠 Current: ${user.current_pos}\n` +
-                            `🟠 Previous: ${previousPos}\n` + 
+                            `🟠 Previous: ${previousPos}\n` +
                             `🟠 Highest: ${user.highest_pos}\n` +
                             `🟠 Lowest: ${user.lowest_pos}\n\n` +
                             "**Stats**\n" +

@@ -1,8 +1,4 @@
-/*
-started work predict last command
-not sure if it does update 
-points for user, need to test somehow
-
+/* for the future
 optional thing here: set thumbnail depending on outcome of game
 draw is neutral, loss is depressed, win is happy
 */
@@ -167,7 +163,7 @@ async function getLastCompletedMatch() {
 
 async function evaluatePrediction(matchId) {
     try {
-        // get match
+        // Get the match
         const match = await Match.findByPk(matchId);
 
         if (!match) {
@@ -175,12 +171,13 @@ async function evaluatePrediction(matchId) {
             return;
         }
 
-        // grab all predictions for the match
+        // Grab all predictions for the match
         const predictions = await Prediction.findAll({
             where: { match_id: matchId },
             include: [User],
         });
 
+        // Update points and other fields for each prediction
         for (const prediction of predictions) {
             const user = prediction.user;
             let points = 0;
@@ -204,7 +201,7 @@ async function evaluatePrediction(matchId) {
                 (prediction.user_home_pred < prediction.user_away_pred &&
                     match.home_goals < match.away_goals);
 
-            //point system here, change values 
+            // Point system
             if (isScoreCorrect) {
                 points += 5;
             }
@@ -221,9 +218,6 @@ async function evaluatePrediction(matchId) {
             await user.update({
                 points: user.points + points,
                 appearances: user.appearances + 1,
-                highest_pos: Math.max(user.highest_pos, 1), //replace 1 with current_pos
-                lowest_pos: Math.min(user.lowest_pos, 1), //replace 1 with current_pos
-                ppg: user.points / 1, //replace 1 with appearances
                 result: isScoreCorrect ? user.result + 1 : user.result, // Increment result if correct
                 first_scorer: isFirstScorerCorrect
                     ? user.first_scorer + 1
@@ -233,6 +227,25 @@ async function evaluatePrediction(matchId) {
 
             // Update the prediction's points_awarded field
             await prediction.update({ points_awarded: points });
+        }
+
+        // After updating user points, sort users by points in descending order
+        const sortedUsers = await User.findAll({
+            order: [["points", "DESC"]],
+        });
+
+        // Update position-related fields for each user
+        for (let i = 0; i < sortedUsers.length; i++) {
+            const user = sortedUsers[i];
+            const currentPos = i + 1;
+
+            await user.update({
+                highest_pos: Math.min(user.highest_pos, currentPos),
+                lowest_pos: Math.max(user.lowest_pos, currentPos),
+                current_pos: currentPos,
+                previous_pos: user.current_pos,
+                ppg: user.points / user.appearances,
+            });
         }
     } catch (error) {
         console.error("Error evaluating predictions:", error);

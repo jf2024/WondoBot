@@ -1,4 +1,4 @@
-/*need to add to the following table
+/*in the future
 c) last match prediction (what was the user last match prediction)
 */
 
@@ -23,15 +23,19 @@ module.exports = (sequelize, DataTypes) => {
             },
             highest_pos: {
                 type: DataTypes.INTEGER,
-                defaultValue: 0,
+                defaultValue: 99,
             },
             lowest_pos: {
                 type: DataTypes.INTEGER,
-                defaultValue: 0,
+                defaultValue: 99,
             },
             current_pos: {
                 type: DataTypes.INTEGER,
-                defaultValue: 0,
+                defaultValue: 99,
+            },
+            previous_pos: {
+                type: DataTypes.INTEGER,
+                defaultValue: 99,
             },
             ppg: {
                 type: DataTypes.FLOAT,
