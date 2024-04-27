@@ -105,3 +105,4 @@ dist
 
 # Bot Stuff
 config.json
+database.sqlite
