@@ -9,6 +9,7 @@ draw is neutral, loss is depressed, win is happy
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const { Prediction, User, Match } = require("../../dbObjects");
 const { Op } = require("sequelize");
+const processedUsers = new Set();
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -23,9 +24,14 @@ module.exports = {
                 return interaction.reply("No completed matches found.");
             }
 
-            // checks 
-            await evaluatePrediction(lastMatch.id);
+            // Check if the match has already been processed
+            if (!processedUsers.has(lastMatch.id)) {
+                // Process the match and update user points
+                await evaluatePrediction(lastMatch.id);
 
+                // Add the match ID to the set of processed matches
+                processedUsers.add(lastMatch.id);
+            }
             const matchResult = `${lastMatch.home_team} ${lastMatch.home_goals}:${lastMatch.away_goals} ${lastMatch.away_team}`;
 
             const homeScore = lastMatch.home_goals;
