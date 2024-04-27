@@ -32,23 +32,40 @@ async function getAllFixtureIds() {
   return matches.map(match => match.fixture_id);
 }
 
-// Calls API every 6 hours to reseed tables in db with data from api
-if (INTERVAL) {
-  setInterval(async function () {
-    try {
-      const existingFixtureIds = await getAllFixtureIds();
-  
-      // Seed matches
-      const matchObject = await seed.getFixturesObject();
-  
-      if (!matchObject || !matchObject.data || matchObject.data.length === 0) {
-        console.log("No data to seed was found. Check api call for data availability.");
-        return;
-      }
-  
-      await Promise.all(matchObject.data.map(async (match) => {
+// Define a variable to track the last update time
+let lastUpdateTime = Date.now();
+
+// Modify your interval function to include the data check
+setInterval(async function () {
+  try {
+    // Calculate the time difference since the last update
+    const currentTime = Date.now();
+    const timeDifference = currentTime - lastUpdateTime;
+
+    // If less than 10 seconds have passed, skip the update
+    if (timeDifference < 10000) {
+      console.log("No new data to update.");
+      return;
+    }
+
+    // Update the last update time
+    lastUpdateTime = currentTime;
+
+    const existingFixtureIds = await getAllFixtureIds();
+
+    // Seed matches
+    const matchObject = await seed.getFixturesObject();
+
+    if (!matchObject || !matchObject.data || matchObject.data.length === 0) {
+      console.log("No data to seed was found. Check api call for data availability.");
+      return;
+    }
+
+    await Promise.all(
+      matchObject.data.map(async (match) => {
+        // Check if match already exists in the database
         if (!existingFixtureIds.includes(match.fixture_id)) {
-          // Insert only if the match is not already in the database
+          // If match doesn't exist, create a new one
           await Match.create({
             fixture_id: match.fixture_id,
             home_team: match.home_team,
@@ -57,40 +74,39 @@ if (INTERVAL) {
             league: match.league,
             home_goals: match.home_goals,
             away_goals: match.away_goals,
-            first_scorer: "No goal scorer", // Placeholder for now
+            first_scorer: "No goal scorer", 
             date: match.date,
             time: match.time,
             finished: match.finished,
           });
         }
-      }));
+      })
+    );
 
-      console.log("Matches reseeded successfully.");
+    console.log("Matches reseeded successfully.");
 
-      // Update first scorer for previous match
-      const previousMatch = await seed.getFindPreviousMatch();
+    // Update first scorer for previous match
+    const previousMatch = await seed.getFindPreviousMatch();
 
-      if (!previousMatch) {
-        console.log("No previous match found.");
-        return;
-      }
-
-      const firstScorer = await getFirstScorer(previousMatch.fixture_id);
-
-      await Match.update(
-        { first_scorer: firstScorer || "No goal scorer" },
-        { where: { fixture_id: previousMatch.fixture_id } }
-      );
-
-      console.log("First scorer reupdated for the previous match:", firstScorer);
-      await seed.updatePlayerData();
-      await seed.getUpdateMatchTable();
-    } catch (error) {
-      console.error("Error reseeding database:", error);
+    if (!previousMatch) {
+      console.log("No previous match found.");
+      return;
     }
-  }, 21600000); // 6 hours interval
-}
 
+    const firstScorer = await getFirstScorer(previousMatch.fixture_id);
+
+    await Match.update(
+      { first_scorer: firstScorer || "No goal scorer" },
+      { where: { fixture_id: previousMatch.fixture_id } }
+    );
+
+    console.log("First scorer reupdated for the previous match:", firstScorer);
+    await seed.updatePlayerData();
+    await seed.getUpdateMatchTable();
+  } catch (error) {
+    console.error("Error reseeding database:", error);
+  }
+}, 21600000); // 6 hours
 
 client.commands = new Collection();
 const foldersPath = path.join(__dirname, "commands");
