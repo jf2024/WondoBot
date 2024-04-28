@@ -3,9 +3,8 @@ optional thing here: set thumbnail depending on outcome of game
 draw is neutral, loss is depressed, win is happy
 */
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const { Prediction, User, Match } = require("../../dbObjects");
+const { Prediction, User, Match, ProcessedMatch } = require("../../dbObjects");
 const { Op } = require("sequelize");
-const processedUsers = new Set();
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -21,12 +20,18 @@ module.exports = {
             }
 
             // Check if the match has already been processed
-            if (!processedUsers.has(lastMatch.id)) {
+            const isMatchProcessed = await ProcessedMatch.findOne({
+                where: { match_id: lastMatch.id },
+            });
+
+            if (!isMatchProcessed) {
                 // Process the match and update user points
                 await evaluatePrediction(lastMatch.id);
 
-                // Add the match ID to the set of processed matches
-                processedUsers.add(lastMatch.id);
+                // Add the match ID to the processed matches table
+                await ProcessedMatch.create({
+                    match_id: lastMatch.id,
+                });
             }
             const matchResult = `${lastMatch.home_team} ${lastMatch.home_goals}:${lastMatch.away_goals} ${lastMatch.away_team}`;
 

@@ -10,11 +10,15 @@ const User = require("./models/users.js")(sequelize, Sequelize.DataTypes);
 const Prediction = require("./models/prediction.js")(sequelize, Sequelize.DataTypes);
 const Match = require("./models/Match.js")(sequelize, Sequelize.DataTypes);
 const Player = require("./models/Player.js")(sequelize, Sequelize.DataTypes);
+const ProcessedMatch = require("./models/processed_matches.js")(sequelize, Sequelize.DataTypes);
 
 User.hasMany(Prediction, { foreignKey: "user_id" });
 Prediction.belongsTo(User, { foreignKey: "user_id" });
 Match.belongsTo(Prediction, { foreignKey: "id" });
 Prediction.hasOne(Match, { foreignKey: "id" });
+
+ProcessedMatch.belongsTo(Match, { foreignKey: "match_id" });
+Match.hasOne(ProcessedMatch, { foreignKey: "match_id" });
 
 Reflect.defineProperty(User.prototype, "createPrediction", {
     value: async (params) => {
@@ -38,4 +42,4 @@ Reflect.defineProperty(User.prototype, "getPredictions", {
     },
 });
 
-module.exports = { User, Match, Prediction, Player };
+module.exports = { User, Match, Prediction, Player, ProcessedMatch };
