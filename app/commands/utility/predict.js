@@ -86,7 +86,7 @@ module.exports = {
 
             // if firstScorerName is "none"
             if (firstScorerName.toLowerCase() === "none") {
-                firstScorerName = "none"; 
+                firstScorerName = "none";
             } else {
                 // find actual player here
                 player = await Player.findOne({
@@ -165,16 +165,18 @@ module.exports = {
             let result;
             if (homeScore === awayScore) {
                 result = "Draw";
-            } else if (homeScore > awayScore) {
-                result =
-                    currentMatch.homeTeam === "San Jose Earthquakes"
-                        ? "Win"
-                        : "Loss";
-            } else {
-                result =
-                    currentMatch.homeTeam === "San Jose Earthquakes"
-                        ? "Loss"
-                        : "Win";
+            } else if (currentMatch.home_team === "San Jose Earthquakes") {
+                if (homeScore > awayScore) {
+                    result = "Win";
+                } else {
+                    result = "Loss";
+                }
+            } else if (currentMatch.away_team === "San Jose Earthquakes") {
+                if (homeScore < awayScore) {
+                    result = "Win";
+                } else {
+                    result = "Loss";
+                }
             }
 
             let outcomeIndicator;
@@ -204,7 +206,11 @@ module.exports = {
                     .setDescription(
                         `**User:** ${interaction.user}\n**Match:** ${currentMatch.home_team} ${homeScore}:${awayScore} ${currentMatch.away_team}\n**First Scorer:** ${firstScorerName}\n**Outcome:** ${result} ${outcomeIndicator}`
                     )
-                    .setThumbnail(player ? player.photoUrl : interaction.user.displayAvatarURL())
+                    .setThumbnail(
+                        player
+                            ? player.photoUrl
+                            : interaction.user.displayAvatarURL()
+                    )
                     .setFooter({
                         text: "You can change your prediction until the match starts.",
                     });
@@ -227,7 +233,11 @@ module.exports = {
                     .setDescription(
                         `**User:** ${interaction.user}\n**Match:** ${currentMatch.home_team} ${homeScore}:${awayScore} ${currentMatch.away_team}\n**First Scorer:** ${firstScorerName}\n**Outcome:** ${result} ${outcomeIndicator}`
                     )
-                    .setThumbnail(player ? player.photoUrl : interaction.user.displayAvatarURL())
+                    .setThumbnail(
+                        player
+                            ? player.photoUrl
+                            : interaction.user.displayAvatarURL()
+                    )
                     .setFooter({
                         text: "You can change your prediction until the match starts.",
                     });
