@@ -54,8 +54,36 @@ if (INTERVAL) {
             return;
           }
 
-          await Promise.all(
-            matchObject.data.map(async (match) => {
+          for (const match of matchObject.data) {
+            const matchExists = await Match.findOne({
+              where: { fixture_id: match.fixture_id },
+            });
+
+            if (matchExists) {
+              if (JSON.stringify(matchExists) === JSON.stringify(match)) {
+                console.log(
+                  `Match with fixture_id ${match.fixture_id} already exists with same fields. Skipping...`
+                );
+                continue;
+              } else {
+                await Match.update(
+                  {
+                    fixture_id: match.fixture_id,
+                    home_team: match.home_team,
+                    away_team: match.away_team,
+                    stadium: match.stadium,
+                    league: match.league,
+                    home_goals: match.home_goals,
+                    away_goals: match.away_goals,
+                    first_scorer: "none", // Placeholder for now
+                    date: match.date,
+                    time: match.time,
+                    finished: match.finished,
+                  },
+                  { where: { fixture_id: match.fixture_id } }
+                );
+              }
+            } else {
               await Match.create({
                 fixture_id: match.fixture_id,
                 home_team: match.home_team,
@@ -69,8 +97,8 @@ if (INTERVAL) {
                 time: match.time,
                 finished: match.finished,
               });
-            })
-          );
+            }
+          }
 
           console.log("Matches reseeded successfully.");
 
@@ -100,7 +128,7 @@ if (INTERVAL) {
         }
       })
       .catch(console.error);
-  }, 10000);
+  }, 21600000);
   // 21600000ms = 6 hours
 }
 

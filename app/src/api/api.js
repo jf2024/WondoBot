@@ -106,4 +106,6 @@ async function getPlayers() {
   }
 }
 
+getFixtures().then((data) => console.log(data));
+
 module.exports = { getFixtures, getFirstScorer, getPlayers };

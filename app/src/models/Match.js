@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
     },
     fixture_id: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
     },
     home_team: {
       type: DataTypes.STRING,
@@ -14,10 +14,10 @@ module.exports = (sequelize, DataTypes) => {
     away_team: {
       type: DataTypes.STRING,
     },
-    league: {
+    stadium: {
       type: DataTypes.STRING,
     },
-    stadium: {
+    league: {
       type: DataTypes.STRING,
     },
     home_goals: {
