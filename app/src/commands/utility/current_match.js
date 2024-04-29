@@ -52,11 +52,14 @@ function formatTime(time) {
 }
 
 function getThumbnailUrl(match) {
-  if (match.league === "Major League Soccer") {
-    return "https://cdn.discordapp.com/attachments/1228944144714436709/1228944263354777640/mls-logo.png?ex=662de289&is=661b6d89&hm=d4f33f8d0a029f4625aeb4b280f629219de2446623f0dfbef63951bbd3cd8322&";
-  } else if (match.league === "Leagues Cup") {
-    return "https://cdn.discordapp.com/attachments/1228944144714436709/1228956095926632458/Leagues_Cup_logo_white-on-black.png?ex=662ded8e&is=661b788e&hm=917e86804748a72a2fcf532ec9f8d9b337ad6f919c27606703df350da134e67c&";
-  }
+    //thumbnails for test server
+    //    return "https://cdn.discordapp.com/attachments/1228944144714436709/1228944263354777640/mls-logo.png?ex=662de289&is=661b6d89&hm=d4f33f8d0a029f4625aeb4b280f629219de2446623f0dfbef63951bbd3cd8322&";
+
+    if (match.league === "Major League Soccer") {
+        return "https://cdn.discordapp.com/attachments/1234582260997423164/1234582269973364831/mls-logo.png?ex=663141d6&is=662ff056&hm=bfc5c1e3686189c87242170c783c9bf25aa325babf093b104b32a677b543b8e9&";
+    } else if (match.league === "Leagues Cup") {
+        return "https://cdn.discordapp.com/attachments/1234582260997423164/1234582311601832046/Leagues_Cup_logo_white-on-black.png?ex=663141e0&is=662ff060&hm=34be01299e980c29f2a56a8e9fb49e3105eb985fee44c7039ae21ff7b7e88138&";
+    }
 }
 
 module.exports = {
