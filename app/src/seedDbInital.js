@@ -1,6 +1,3 @@
-/*need to perdioically call api instead of 
-needing to run the seed file every time we want to update the database.c
-*/
 const Sequelize = require("sequelize");
 const { Op } = require("sequelize");
 const { getFixtures, getFirstScorer, getPlayers } = require("./api/api.js");

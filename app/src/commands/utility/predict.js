@@ -1,9 +1,6 @@
 /*
-currently works with full initial or just last name
-my concern is that if its just last name, would that
-hinder the check for the first scorer later on? 
-i dont think so since we can match it with the player name anyway but
-still something to consider
+later down the road, try and get nicknames of players
+and full names of players (beyond this class)
 */
 
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");

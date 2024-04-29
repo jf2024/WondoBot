@@ -11,7 +11,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     match_id: {
       type: DataTypes.INTEGER,
-      // primaryKey: true,
       allowNull: false,
     },
     user_home_pred: {

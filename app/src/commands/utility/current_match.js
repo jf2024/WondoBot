@@ -86,7 +86,6 @@ module.exports = {
       .setDescription(
         `**Match:** ${match.home_team} vs ${match.away_team}\n**Date:** ${date}\n**Time:** ${time}\n**Venue:** ${match.stadium}\n**League:** ${match.league}`
       )
-      //figure out a different way to get the logo\
       //currently just posting picture on server where bot is located and copying that link onto here
       .setThumbnail(thumbnailUrl)
       .setFooter({
