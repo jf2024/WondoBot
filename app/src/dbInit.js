@@ -15,24 +15,18 @@ const testDbConnection = async () => {
   }
 };
 
-const User = require("./models/User.js")(sequelize, Sequelize.DataTypes);
+const User = require("./models/Users.js")(sequelize, Sequelize.DataTypes);
 require("./models/Prediction.js")(sequelize, Sequelize.DataTypes);
 require("./models/Match.js")(sequelize, Sequelize.DataTypes);
+require("./models/Player.js")(sequelize, Sequelize.DataTypes);
+require("./models/Processed_Matches.js")(sequelize, Sequelize.DataTypes);
 
 const force = process.argv.includes("--force") || process.argv.includes("-f");
 
 sequelize
   .sync({ force })
   .then(async () => {
-    // const jane = await Users.create({
-    //   user_id: "123456789",
-    //   username: "jane",
-    //   score: 0,
-    // });
-
-    console.log("Database synced");
-    // console.log(jane instanceof Users);
-    // console.log(jane.user_id, jane.username, jane.score);
+    console.log("Database initialized successfully.");
     sequelize.close();
   })
   .catch(console.error);
