@@ -28,4 +28,4 @@ And other commands!
 
 Join this discord server [here](https://discord.gg/JqzU9sx9JS) so you can try out the bot as well!
 
-Quick note: The bot should be online and you can type away with the commands as much as you like! (just give it a second to type in between commands). If you receive an error, that means the server/host where the bot is being hosted on went down for maintenance or other updates. If that's the case, just ping Jose and he can come online to run the bot locally on his machine and you can use the bot as normal.
+Quick note: The bot should be online and you can type away with the commands as much as you like! (just give it a second to type in between commands). If you receive an error, that means the server/host where the bot is being hosted on went down for maintenance or other updates. If that's the case, just ping Jose (who on the server is @ninjabathat27) and he can come online to check the server where the bot is located to make sure it works or run the bot locally on his machine and you can use the bot as normal.
