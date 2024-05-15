@@ -26,8 +26,6 @@ module.exports = {
           lowest_pos: 99,
         };
 
-        const previousPos = user.current_pos > 1 ? user.current_pos - 1 : 1;
-
         // Create the embed with note for users who haven't predicted yet
         const embed = new EmbedBuilder()
           .setColor("#0099ff")
@@ -36,13 +34,12 @@ module.exports = {
             `User: ${interaction.user.toString()}\n\n` +
               "**Rankings**\n" +
               `🟠 Current: ${user.current_pos}\n` +
-              `🟠 Previous: ${previousPos}\n` +
               `🟠 Highest: ${user.highest_pos}\n` +
               `🟠 Lowest: ${user.lowest_pos}\n\n` +
               "**Stats**\n" +
               `🔵 Appearances: ${user.appearances}\n` +
               `🔵 Points: ${user.points}\n` +
-              `🔵 PPG: ${user.ppg}\n` +
+              `🔵 PPG: ${user.points > 0 ? user.ppg.toFixed(2) : 0}\n` + // Ensure PPG is displayed properly
               `🔵 Result: ${user.result}\n` +
               `🔵 Scorer: ${user.first_scorer}\n` +
               `🔵 Outcome: ${user.outcome}\n\n` +
@@ -70,7 +67,7 @@ module.exports = {
               "**Stats**\n" +
               `🔵 Appearances: ${user.appearances}\n` +
               `🔵 Points: ${user.points}\n` +
-              `🔵 PPG: ${user.ppg}\n` +
+              `🔵 PPG: ${user.points > 0 ? user.ppg.toFixed(2) : 0}\n` + // Ensure PPG is displayed properly
               `🔵 Result: ${user.result}\n` +
               `🔵 Scorer: ${user.first_scorer}\n` +
               `🔵 Outcome: ${user.outcome}\n`

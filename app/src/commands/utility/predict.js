@@ -7,17 +7,8 @@ const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const { Prediction, User, Match, Player } = require("../../dbObjects.js");
 const { Op } = require("sequelize");
 
-async function findCurrentMatch() {
+async function findCurrentMatch(currentDate, gracePeriodEnd) {
   try {
-    const currentDate = new Date();
-    console.log("Current date:", currentDate.toLocaleDateString());
-    console.log("Current time:", currentDate.toLocaleTimeString());
-
-    const gracePeriodMinutes = 135; // 2 hours and 15 minutes
-    const gracePeriodEnd = new Date(
-      currentDate.getTime() + gracePeriodMinutes * 60000
-    );
-
     const nextMatch = await Match.findOne({
       where: {
         [Op.or]: [
@@ -29,8 +20,8 @@ async function findCurrentMatch() {
           {
             date: currentDate.toLocaleDateString(),
             time: {
-              [Op.gte]: currentDate.toLocaleTimeString(),
-              [Op.lte]: gracePeriodEnd.toLocaleTimeString(),
+              [Op.gte]: currentDate.toTimeString().slice(0, 8), // Format time as HH:MM:SS
+              [Op.lte]: gracePeriodEnd.toTimeString().slice(0, 8), // Format time as HH:MM:SS
             },
           },
         ],
@@ -110,7 +101,11 @@ module.exports = {
         }
       }
 
-      const currentMatch = await findCurrentMatch();
+      const currentDate = new Date();
+      const gracePeriodMinutes = 135; // 2 hours and 15 minutes
+      const gracePeriodEnd = new Date(currentDate.getTime() + gracePeriodMinutes * 60000);
+
+      const currentMatch = await findCurrentMatch(currentDate, gracePeriodEnd);
       if (!currentMatch) {
         const noMatchesEmbed = new EmbedBuilder()
           .setColor("#FF0000")
@@ -121,12 +116,12 @@ module.exports = {
         return interaction.reply({ embeds: [noMatchesEmbed] });
       }
 
-      const currentTime = new Date();
       const matchStartTime = new Date(
         `${currentMatch.date} ${currentMatch.time}`
       );
 
       //embed for match started already
+      const currentTime = new Date();
       if (currentTime >= matchStartTime) {
         const matchStartedEmbed = new EmbedBuilder()
           .setColor("#FF0000")
@@ -220,26 +215,26 @@ module.exports = {
         });
 
         const newPredictionEmbed = new EmbedBuilder()
-          .setColor("#0099ff")
-          .setTitle("🏆⚽ Prediction Updated")
-          .setDescription(
-            `**User:** ${interaction.user}\n**Match:** ${currentMatch.home_team} ${homeScore}:${awayScore} ${currentMatch.away_team}\n**First Scorer:** ${firstScorerName}\n**Outcome:** ${result} ${outcomeIndicator}`
-          )
-          .setThumbnail(
-            player ? player.photoUrl : interaction.user.displayAvatarURL()
-          )
-          .setFooter({
-            text: "You can change your prediction until the match starts.",
-          });
-        return interaction.reply({ embeds: [newPredictionEmbed] });
-      }
-    } catch (error) {
-      console.error("Error executing predict command:", error);
-      const errorEmbed = new EmbedBuilder()
-        .setColor("#FF0000")
-        .setTitle("🗓️ Error")
-        .setDescription("An error occurred while processing your prediction.");
-      await interaction.reply({ embeds: [errorEmbed] });
-    }
-  },
+  .setColor("#0099ff")
+  .setTitle("🏆⚽ Prediction Updated")
+  .setDescription(
+    `**User:** ${interaction.user}\n**Match:** ${currentMatch.home_team} ${homeScore}:${awayScore} ${currentMatch.away_team}\n**First Scorer:** ${firstScorerName}\n**Outcome:** ${result} ${outcomeIndicator}`
+  )
+  .setThumbnail(
+    player ? player.photoUrl : interaction.user.displayAvatarURL()
+  )
+  .setFooter({
+    text: "You can change your prediction until the match starts.",
+  });
+return interaction.reply({ embeds: [newPredictionEmbed] });
+}
+} catch (error) {
+console.error("Error executing predict command:", error);
+const errorEmbed = new EmbedBuilder()
+  .setColor("#FF0000")
+  .setTitle("🗓️ Error")
+  .setDescription("An error occurred while processing your prediction.");
+await interaction.reply({ embeds: [errorEmbed] });
+}
+},
 };

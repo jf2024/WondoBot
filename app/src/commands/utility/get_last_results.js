@@ -2,6 +2,7 @@
 optional thing here: set thumbnail depending on outcome of game
 draw is neutral, loss is depressed, win is happy
 */
+
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const { Prediction, User, Match, ProcessedMatch } = require("../../dbObjects");
 const { Op } = require("sequelize");
@@ -40,16 +41,16 @@ module.exports = {
       let result;
       let outcomeIndicator;
 
-      if (homeScore === awayScore) {
-        result = "Draw";
-        outcomeIndicator = "🟠";
-      } else if (homeScore > awayScore) {
-        result = lastMatch.homeTeam === "San Jose Earthquakes" ? "Win" : "Loss";
-        outcomeIndicator = result === "Win" ? "🟢" : "🔴";
-      } else {
-        result = lastMatch.homeTeam === "San Jose Earthquakes" ? "Loss" : "Win";
-        outcomeIndicator = result === "Win" ? "🟢" : "🔴";
-      }
+if (homeScore === awayScore) {
+  result = "Draw";
+  outcomeIndicator = "🟠";
+} else if (lastMatch.home_team === "San Jose Earthquakes") {
+  result = homeScore > awayScore ? "Win" : "Loss";
+  outcomeIndicator = result === "Win" ? "🟢" : "🔴";
+} else {
+  result = homeScore < awayScore ? "Win" : "Loss";
+  outcomeIndicator = result === "Win" ? "🟢" : "🔴";
+}
 
       const outcomeText = `${result} ${outcomeIndicator}`;
 
@@ -235,13 +236,16 @@ async function evaluatePrediction(matchId) {
       const user = sortedUsers[i];
       const currentPos = i + 1;
 
-      await user.update({
-        highest_pos: Math.min(user.highest_pos, currentPos),
-        lowest_pos: Math.max(user.lowest_pos, currentPos),
-        current_pos: currentPos,
-        previous_pos: user.current_pos,
-        ppg: user.points / user.appearances,
-      });
+      // Only update position-related fields for users who participated in the prediction
+      if (user.appearances > 0) {
+        await user.update({
+          highest_pos: Math.min(user.highest_pos, currentPos),
+          lowest_pos: Math.max(user.lowest_pos, currentPos),
+          current_pos: currentPos,
+          previous_pos: user.current_pos,
+          ppg: user.points / user.appearances,
+        });
+      }
     }
   } catch (error) {
     console.error("Error evaluating predictions:", error);
